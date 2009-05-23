@@ -1,0 +1,55 @@
+.nav {
+	font-size: 90%;
+	background-color: #ddd;
+}
+table {
+	border-style: solid;
+	border-width: thin;
+}
+table.numeric td {
+	text-align: right;
+	width: 8em;
+}
+th {
+	background-color: #ddd;
+	color: #000;
+}
+th, td{
+
+}
+td {
+	background-color: #fff;
+	color: #000;
+}
+td.pcpn-80 {
+	background-color: #f00;
+	color: #fff;
+}
+td.pcpn-50 {
+	background-color: #f0f;
+	color: #fff;
+}
+td.pcpn-30 {
+	background-color: #f90;
+	color: #000;
+}
+td.pcpn-20 {
+	background-color: #ff0;
+	color: #000;
+}
+td.pcpn-10 {
+	background-color: #0f0;
+	color: #000;
+}
+td.pcpn-5 {
+	background-color: #00f;
+	color: #fff;
+}
+td.pcpn-1 {
+	background-color: #36f;
+	color: #fff;
+}
+td.pcpn-0 {
+	background-color: #9cf;
+	color: #000;
+}

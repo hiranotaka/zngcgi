@@ -1,0 +1,8 @@
+Make the following files and directories under a public directory.
+
+* antenna.cgi -- symbolic link to zngcgi/cgi-bin/antenna.cgi
+* antenna.conf -- configuration file. see zngcgi/examples/antenna.conf
+* static -- symbolic link to zngcgi/static
+* analysis -- empty directory if necessary
+
+Enjoy debugging :)

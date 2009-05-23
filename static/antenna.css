@@ -1,0 +1,57 @@
+h1 {
+  background-color: #363;
+  border-color: #030;
+  border-style: solid;
+  border-width: 0.1em 0;
+  color: #fff;
+  font-size: 200%;
+  margin: 0.5em 0;
+  padding: 0.5em;
+}
+ol {
+  list-style-position: inside;
+  margin: 1em 0;
+  padding: 0;
+  overflow: hidden;
+}
+ol li {
+  border-color: #393;
+  border-style: solid;
+  border-width: 0 0 0 0.5em;
+  margin: 0.3em 0;
+  padding: 0.1em 0 0.1em 0.5em;
+  white-space: nowrap;
+}
+.nav {
+  font-size: 90%;
+}
+.title {
+  display: inline-block;
+  font-weight: bold;
+  max-width: 30%;
+  overflow: hidden;
+  vertical-align: text-bottom;
+}
+.source {
+  font-size: 90%;
+}
+.updated-sec {
+  font-size: 90%;
+  color: #f00;
+}
+.updated-min {
+  font-size: 90%;
+  color: #c30;
+}
+.updated-hour {
+  font-size: 90%;
+  color: #960;
+}
+.updated-day {
+  font-size: 90%;
+  color: #690;
+}
+.content {
+  font-size: 90%;
+  color: #333;
+}

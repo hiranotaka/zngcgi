@@ -1,0 +1,32 @@
+.tab, .resolving, .connecting, .communicating, .label {
+  float: left;
+  height: 12px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.label {
+  width: 20%;
+  padding: 0 0 0 1%;
+  overflow: visible;
+}
+.tab, .resolving, .connecting, .communicating {
+  width: 1%;
+  overflow: hidden;
+  text-align: right;
+}
+.return {
+  clear: left;
+  height: 2px;
+}
+.resolving {
+  background-color: #f30;
+  color: #fff;
+}
+.connecting {
+  background-color: #6c3;
+  color: #fff;
+}
+.communicating {
+  background-color: #06f;
+  color: #fff;
+}
