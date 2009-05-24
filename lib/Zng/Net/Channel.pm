@@ -19,7 +19,7 @@ sub new ( $$ ) {
 	errorstring => undef,
 	sending_tasks => [],
 	receiving_tasks => [],
-	buf => undef,
+	buffer => undef,
 	offset => 0,
     };
     bless $self, $class;
