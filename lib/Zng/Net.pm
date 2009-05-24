@@ -53,38 +53,11 @@ sub add_query ( $$$ ) {
     $map->add_query($answer_handler);
 }
 
-sub add_request ( $$$;$ ) {
+sub add_request_addrport ( $$$$ ) {
     my $self = shift;
     my $request = shift;
     my $response_handler = shift;
     my $addrport = shift;
-
-    my $uri = $request->uri;
-    unless ($uri->scheme eq 'http') {
-	$@ = __PACKAGE__ . ': unsupported scheme';
-	&$response_handler(undef);
-	return 1;
-    }
-
-    unless (defined $addrport) {
-	$self->add_log($request, 'resolving');
-
-	my $host = $uri->host;
-	my $port = $uri->port;
-	my $answer_handler = sub ($) {
-	    my $addr = shift;
-
-	    unless ($addr) {
-		&$response_handler(undef);
-		return;
-	    }
-	    $self->add_request($request, $response_handler, "$addr:$port");
-	};
-
-	$self->add_query($host, $answer_handler);
-	return;
-    }
-
 
     my $channels = $self->{channels};
     my $channel = $channels->{$addrport};
@@ -94,6 +67,36 @@ sub add_request ( $$$;$ ) {
     }
 
     $channel->add_request($request, $response_handler);
+}
+
+sub add_request ( $$$;$ ) {
+    my $self = shift;
+    my $request = shift;
+    my $response_handler = shift;
+
+    my $uri = $request->uri;
+    unless ($uri->scheme eq 'http') {
+	$@ = __PACKAGE__ . ': unsupported scheme';
+	&$response_handler(undef);
+	return 1;
+    }
+
+    $self->add_log($request, 'resolving');
+
+    my $host = $uri->host;
+    my $port = $uri->port;
+    my $answer_handler = sub ( $ ) {
+	my $addr = shift;
+
+	unless ($addr) {
+	    &$response_handler(undef);
+	    return;
+	}
+	$self->add_request_addrport($request, $response_handler, "$addr:$port");
+    };
+
+    $self->add_query($host, $answer_handler);
+    return;
 }
 
 sub set ( $$;$$ ) {
