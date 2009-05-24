@@ -12,7 +12,6 @@ sub new ( $$ ) {
     my $class = shift;
     my $net = shift;
     my $addrport = shift;
-    my $log = shift;
 
     my $self = {
 	net => $net,

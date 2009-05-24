@@ -66,8 +66,6 @@ sub add_request ( $$$;$ ) {
 	return 1;
     }
 
-    my $log = $self->{log};
-
     unless (defined $addrport) {
 	$self->add_log($request, 'resolving');
 
@@ -91,7 +89,7 @@ sub add_request ( $$$;$ ) {
     my $channels = $self->{channels};
     my $channel = $channels->{$addrport};
     unless ($channel) {
-	$channel = Zng::Net::Channel->new($self, $addrport, $log);
+	$channel = Zng::Net::Channel->new($self, $addrport);
 	$channels->{$addrport} = $channel;
     }
 
