@@ -1077,7 +1077,9 @@ sub print_html ( $ ) {
     my @selected_tags = param('tags');
     @selected_tags = @tags unless @selected_tags;
     my $expected_title = param('title');
-    $expected_title = nkf '-W -w ', $expected_title;
+    # perl 5.6 does not have Unicode::Normalize.
+    # We use -Z1 --utf8mac-input instead.
+    $expected_title = nkf '-w -W -Z1 --utf8mac-input', $expected_title;
     my $count = int param('count') || 50;
 
     print(header(-charset => 'utf-8',
@@ -1119,7 +1121,7 @@ sub print_html ( $ ) {
     for my $tag (@selected_tags) {
 	$tag_selected{$tag} = 1;
     }
-    my $expected_title_re = quotemeta __shrink_width($expected_title);
+    my $expected_title_re = quotemeta $expected_title;
 
     my $entries = $cache->content->{entries};
     my $i = 0;
@@ -1129,7 +1131,8 @@ sub print_html ( $ ) {
 	next unless ($tag_selected{$tag});
 
 	my $title = $entry->{title};
-	next unless __shrink_width($title) =~ /$expected_title_re/io;
+	my $normalized_title = nkf '-w -W -Z1 --utf8mac-input', $title;
+	next unless $normalized_title =~ /$expected_title_re/io;
 
 	__print_li $last_modified, $entry;
 
@@ -1198,7 +1201,7 @@ sub print_mobile_html ( $ ) {
     my $formatted_last_modified = localtime $last_modified;
 
     my $sjis_expected_title = param('title');
-    my $expected_title = nkf '-w -S -x', $sjis_expected_title;
+    my $expected_title = nkf '-w -S -Z1', $sjis_expected_title;
 
     $content .= start_html(-encoding => 'shift_jis',
 			   -lang => $lang,
@@ -1214,11 +1217,12 @@ sub print_mobile_html ( $ ) {
     $content .= end_form;
     $content .= start_ol;
 
-    my $expected_title_re = quotemeta __shrink_width($expected_title);
+    my $expected_title_re = quotemeta $expected_title;
     my $i = 0;
     for my $entry (@$entries) {
 	my $title = $entry->{title};
-	next unless __shrink_width($title) =~ /$expected_title_re/io;
+	my $normalized_title = nkf '-w -W -Z1 --utf8mac-input', $title;
+	next unless $normalized_title =~ /$expected_title_re/io;
 	$content .= __print_mobile_li $last_modified, $entry;
 	++$i < 25 or last;
     }
