@@ -1074,13 +1074,13 @@ sub print_html ( $ ) {
 	$titles{$tag} = $feed->{title};
     }
 
-    my @selected_tags = param('tags');
-    @selected_tags = @tags unless @selected_tags;
+    my $advanced = param('advanced');
     my $expected_title = param('title');
     # perl 5.6 does not have Unicode::Normalize.
     # We use -Z1 --utf8mac-input instead.
     $expected_title = nkf '-w -W -Z1 --utf8mac-input', $expected_title;
-    my $count = int param('count') || 50;
+    my @selected_tags = $advanced ? param('tags') : @tags;
+    my $count = $advanced ? param('count') : 50;
 
     print(header(-charset => 'utf-8',
 		 -expires => $last_modified + $::expires),
@@ -1106,15 +1106,21 @@ sub print_html ( $ ) {
 	  $::nav ? div({-class => 'nav'}, $::nav) : (),
 	  start_form({-method => 'get'}),
 	  div({-class => 'nav'},
+              'Search:',
 	      textfield(-name => 'title', -default => $expected_title,
 			-override => 1), ' ',
-	      span({-class => 'checkbox_group'},
-		   checkbox_group(-name => 'tags', -values => \@tags,
-				  -default => \@selected_tags,
-				  -labels => \%titles, -override => 1)),
-	      textfield(-name => 'count', -default => $count,
-			-size => 3, -override => 1), 'items ',
-	      submit(-value => 'Refresh!')),
+	      submit(-value => 'Refresh!'),
+              $advanced ?
+              (a({-href => "$url"},
+                 'Hide Options'),
+               hidden(-name => 'advanced', -value => 'on'),
+               checkbox_group(-name => 'tags', -values => \@tags,
+                              -default => \@selected_tags,
+                              -labels => \%titles, -override => 1),
+               textfield(-name => 'count', -default => $count,
+                         -size => 3, -override => 1), 'items') :
+              a({-href => "$url?advanced=on;count=$count"},
+                'Show Options')),
 	  end_form, start_ol);
 
     my %tag_selected;
@@ -1139,12 +1145,7 @@ sub print_html ( $ ) {
 	++$i < $count or last;
     }
 
-    my $library_script_file =
-	'http://ajax.googleapis.com/ajax/libs/prototype/1.6.0.3/prototype.js';
-    print(end_ol,
-	  script({-src => $library_script_file}, ''),
-	  script({-src => $::static_dir . '/antenna.js'}, ''),
-	  end_html);
+    print(end_ol, end_html);
 }
 
 sub __print_mobile_li ( $$ ) {
