@@ -248,7 +248,7 @@ sub __send_requests ( $$ ) {
     my $self = shift;
     my $handle = shift;
 
-    unless ($self->{buffer}) {
+    unless (defined $self->{buffer}) {
 	$self->__prepare_send_requests($handle);
     }
 
@@ -265,7 +265,7 @@ sub __send_requests ( $$ ) {
 	my $net = $self->{net};
 	$net->set($handle, POLLIN, $self);
 
-	$buffer = '';
+	$buffer = undef;
 	$offset = 0;
     }
 
