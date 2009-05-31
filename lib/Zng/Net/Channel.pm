@@ -19,6 +19,7 @@ sub new ( $$ ) {
 	errorstring => undef,
 	sending_tasks => [],
 	receiving_tasks => [],
+	response => undef,
 	buffer => undef,
 	offset => 0,
     };
@@ -185,7 +186,7 @@ sub __receive_response_body ( $$ ) {
     my $listener = $task->{listener};
     &$listener($response);
 
-    delete $self->{response};
+    $self->{response} = undef;
 }
 
 sub __receive_response ( $$ ) {
