@@ -89,6 +89,7 @@ sub add_request ( $$$;$ ) {
 	my $addr = shift;
 
 	unless ($addr) {
+	    $self->add_log($request, "aborted: $@");
 	    &$response_handler(undef);
 	    return;
 	}
