@@ -65,12 +65,28 @@ sub base_uri ( $ ) {
 
 sub text_content ( $ ) {
     my $self = shift;
-    return $self->{data}->{text_content};
+    my $data = $self->{data};
+    my $author = $data->{author};
+    my $email = $data->{email};
+    my $content = $data->{text_content};
+    if ($email eq '') {
+	return "$author: $content";
+    } else {
+	return "$author <$email>: $content";
+    }
 }
 
 sub html_content ( $ ) {
     my $self = shift;
-    return $self->{data}->{html_content};
+    my $data = $self->{data};
+    my $author = $data->{author};
+    my $email = $data->{email};
+    my $content = $data->{html_content};
+    if ($email eq '') {
+	return "<dl><dt>$author</dt><dd>$content</dd>";
+    } else {
+	return "<dl><dt>$author &lt;$email&gt;</dt><dd>$content</dd>";
+    }
 }
 
 sub updated ( $ ) {
