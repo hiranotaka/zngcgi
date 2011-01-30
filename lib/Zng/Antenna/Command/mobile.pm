@@ -139,8 +139,8 @@ sub format ( $$$ ) {
 
     my $content;
 
-    my $lang = $::lang;
-    my $title = $::title;
+    my $lang = $config->{lang};
+    my $title = $config->{title};
     my $escaped_title = $q->escapeHTML($title);
     my $formatted_last_modified = localtime $last_modified;
 
@@ -205,7 +205,7 @@ sub format ( $$$ ) {
     $content .= $q->end_html;
 
     my $sjis_content = nkf '-s -W -x', $content;
-    $fh->print($q->header(-expires => $last_modified + $::expires,
+    $fh->print($q->header(-expires => $last_modified + $config->{expires},
 			  -Content_lengh => length $sjis_content),
 	       $sjis_content);
 }
