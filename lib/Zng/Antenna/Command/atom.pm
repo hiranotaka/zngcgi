@@ -30,7 +30,7 @@ sub format ( $$$ ) {
 	  qq{<?xml version="1.0" encoding="utf-8"?>},
 	  qq{<feed xmlns="http://www.w3.org/2005/Atom"},
 	  qq{ xml:lang="$escaped_lang">},
-	  qq{<id>$escaped_url</id>},
+	  qq{<id>$escaped_id</id>},
 	  qq{<title>$escaped_title</title>},
 	  qq{<author><name>$escaped_author</name></author>},
 	  qq{<link href="$escaped_self_url" rel="self" />},
