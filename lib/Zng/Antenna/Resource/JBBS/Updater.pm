@@ -19,7 +19,7 @@ sub __thread_parse_line ( $$ ) {
     $@ eq '' or return;
     $updated -= 9 * 60 * 60;
 
-    $author_with_signature =~ /^(.*?)(<\/b> (◆.*)<b>)?$/;
+    $author_with_signature =~ /^(.*?)(?:<\/b> (◆.*)<b>)?$/;
     my $author = $1 ne '' ? $1 : $2;
 
     $email = '' if $email eq 'sage';
