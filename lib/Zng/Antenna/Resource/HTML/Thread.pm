@@ -31,7 +31,7 @@ sub title ( $ ) {
 
 sub link ( $ ) {
     my $self = shift;
-    return $self->{data}->{link};
+    return $self->{data}->{url};
 }
 
 sub text_content ( $ ) {
