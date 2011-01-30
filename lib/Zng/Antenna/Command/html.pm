@@ -1,7 +1,6 @@
 package Zng::Antenna::Command::html;
 
 use strict;
-use JSON;
 use NKF;
 use Zng::Antenna;
 
