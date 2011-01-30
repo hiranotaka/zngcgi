@@ -97,10 +97,10 @@ sub __parse_line ( $$ ) {
     my $line = shift;
 
     my ($file, $html_title_with_num_messages) = split /,/, $line;
-    $file =~ /^(\d+)\.cgi$/ or die;
+    $file =~ /^(\d+)\.cgi$/ or return 0;
     my $created = int $1;
 
-    $html_title_with_num_messages =~ /^(.*)\((\d+)\)$/ or die $line;
+    $html_title_with_num_messages =~ /^(.*)\((\d+)\)$/ or return 0;
 
     my $html_title = $1;
     my $num_messages = int $2;
@@ -111,6 +111,7 @@ sub __parse_line ( $$ ) {
     $thread->{created} = $created;
     $thread->{title} = $title;
     $thread->{num_messages} = $num_messages;
+    return 1;
 }
 
 sub __parse_content ( $$ ) {
@@ -138,7 +139,7 @@ sub __parse_content ( $$ ) {
     (undef, @$lines) = split /\n/, $content;
     for my $line (@$lines) {
 	my $thread_stub = {};
-	__parse_line $thread_stub, $line;
+	__parse_line $thread_stub, $line or next;
 
 	my $created = $thread_stub->{created};
 	my $thread = $thread_map->{$created} || {
