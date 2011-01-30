@@ -127,24 +127,32 @@ sub __parse_line ( $$ ) {
 
     my ($file, $html_title_with_num_messages) = split /<>/, $line;
 
-    $file =~ /^(\d+)\.dat$/ or return;
+    $file =~ /^(\d+)\.dat$/ or return 0;
     my $created = int $1;
 
-    $html_title_with_num_messages =~ /^(.*) \((\d+)\)$/ or return;
+    $html_title_with_num_messages =~ /^(.*) \((\d+)\)$/ or return 0;
     my $html_title = $1;
     my $num_messages = int $2;
 
     my $title = Zng::Antenna::Updater::html_to_text $html_title;
     $title = $html_title unless defined $title;
 
+    my $title_re = $thread->{feed}->{thread_title_re};
+    if (defined $title_re) {
+	$title =~ /$title_re/ or return 0;
+    }
+
     $thread->{created} = $created;
     $thread->{title} = $title;
     $thread->{num_messages} = $num_messages;
+    return 1;
 }
 
 sub __parse_content ( $$ ) {
     my $feed = shift;
     my $sjis_content = shift;
+
+    my $thread_title_re = $feed->{thread_title_re};
 
     my $threads = $feed->{threads} || [];
     my $thread_map = {};
@@ -159,12 +167,11 @@ sub __parse_content ( $$ ) {
     my $content = nkf '-w -S -x', $sjis_content;
     my $lines = [ split /\n/, $content ];
     for my $line (@$lines) {
-	my $thread_stub = {};
-	__parse_line $thread_stub, $line;
+	my $thread_stub = { feed => $feed };
+	__parse_line $thread_stub, $line or next;
 
 	my $created = $thread_stub->{created};
 	my $thread = $thread_map->{$created} || {
-	    feed => $feed,
 	    num_fetched_messages => 0,
 	    num_bytes => 0,
 	};

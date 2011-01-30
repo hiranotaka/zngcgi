@@ -108,6 +108,11 @@ sub __parse_line ( $$ ) {
     my $title = Zng::Antenna::Updater::html_to_text $html_title;
     $title =~ s/＠｀/,/g;
 
+    my $title_re = $thread->{feed}->{thread_title_re};
+    if (defined $title_re) {
+	$title =~ /$title_re/ or return 0;
+    }
+
     $thread->{created} = $created;
     $thread->{title} = $title;
     $thread->{num_messages} = $num_messages;
@@ -138,13 +143,11 @@ sub __parse_content ( $$ ) {
     my $lines = [];
     (undef, @$lines) = split /\n/, $content;
     for my $line (@$lines) {
-	my $thread_stub = {};
+	my $thread_stub = { feed => $feed };
 	__parse_line $thread_stub, $line or next;
 
 	my $created = $thread_stub->{created};
-	my $thread = $thread_map->{$created} || {
-	    feed => $feed,
-	};
+	my $thread = $thread_map->{$created} || {};
 	%$thread = ( %$thread, %$thread_stub );
 	push @$threads, $thread;
     }
