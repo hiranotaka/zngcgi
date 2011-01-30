@@ -44,7 +44,7 @@ sub __parse_status ( $$ ) {
 
     my $content = $status->{text};
     $content = substr $content, 0; # strip the utf-8 flag
-    $thread->{content} = $content;
+    $thread->{content} = Zng::Antenna::Updater::html_to_text $content;
 
     __parse_user $thread, $status->{user};
     return 1;
