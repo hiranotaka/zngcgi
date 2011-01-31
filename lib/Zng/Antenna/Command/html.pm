@@ -138,7 +138,8 @@ sub format ( $$$ ) {
     my $type = $q->param('type') || 'html';
     my $is_smartphone = $type eq 'smartphone';
     my $style_file = $is_smartphone ? 'antenna_smartphone.css' : 'antenna.css';
-    my $meta = $is_smartphone ? { 'viewport' => 'width=device-width' } : {};
+    my $meta = $is_smartphone ?
+	{ viewport => 'width=device-width; user-scalable=0' } : {};
 
     my $basic_url = "$url?type=$type";
     my $advanced_url = "$url?type=$type;advanced=on";
