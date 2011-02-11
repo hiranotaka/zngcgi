@@ -144,6 +144,19 @@ sub format ( $$$ ) {
     my $basic_url = "$url?type=$type";
     my $advanced_url = "$url?type=$type;advanced=on";
 
+    my $head =
+	[ $q->Link({-href =>  "$url?type=atom",
+		    -rel => 'alternate',
+		    -title => $title,
+		    -type => 'application/atom+xml'}),
+	  $q->Link({-href => "$static_dir/antenna.ico",
+		    -rel => 'icon',
+		    -type => 'image/png'}),
+	  ($is_smartphone ?
+	   $q->Link({-href => "$static_dir/antenna_smartphone.png",
+		     -rel => 'apple-touch-icon',
+		     -type => 'image/png'}) : ()) ];
+
     $fh->print($q->header(-charset => 'utf-8',
 			  -expires => $last_modified + $config->{expires}),
 	       $q->start_html(-encoding => 'utf-8',
@@ -151,14 +164,7 @@ sub format ( $$$ ) {
 			      -title => $title,
 			      -style => { -src => "$static_dir/$style_file" },
 			      -meta => $meta,
-			      -head => [
-				   $q->Link({-href =>  "$url?type=atom",
-					     -rel => 'alternate',
-					     -title => $title,
-					     -type => 'application/atom+xml'}),
-				   $q->Link({-href => "$static_dir/antenna.png",
-					     -rel => 'icon',
-					     -type => 'image/png'})]),
+			      -head => $head),
 	       $q->h1($escaped_title),
 	       $q->div({-class => 'nav'},
 		       scalar localtime $last_modified, '|',
