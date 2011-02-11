@@ -170,12 +170,10 @@ sub format ( $$$ ) {
 		       scalar localtime $last_modified, '|',
 		       $is_smartphone ?
 		       ($q->a({-href => "$url"}, 'Normal'), '|',
-			$q->strong('Smartphone'),
-			$q->span({-class => 'note'}, 'Beta')) :
+			$q->strong('Smartphone')) :
 		       ($q->strong('Normal'), '|',
 			$q->a({-href => "$url?type=smartphone"},
-			      'Smartphone'),
-			$q->span({-class => 'note'}, 'Beta')), '|',
+			      'Smartphone')), '|',
 		       $q->a({-href => "$url?type=mobile"}, 'Mobile'), '|',
 		       $q->a({-href => $config->{chart_dir}}, 'Analysis')),
 	       $config->{nav} ? $q->div({-class => 'nav'}, $config->{nav}) : (),
