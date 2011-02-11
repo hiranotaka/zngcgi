@@ -78,7 +78,7 @@ sub format ( $$$ ) {
 	}
 	$fh->print(q{</entry>});
     }
-    $fh->print q{</feed>};
+    $fh->print(q{</feed>});
 }
 
 1;
