@@ -183,8 +183,11 @@ sub format ( $$$ ) {
 		       $q->textfield(-name => 'title',
 				     -default => $expected_title,
 				     -override => 1), ' ',
+		       $is_smartphone ?
+		       $q->hidden(-name => 'type', -default => 'smartphone',
+				  override => 1) : (),
 		       $q->submit(-value => 'Refresh!'),
-		   $advanced ?
+		       $advanced ?
 		       ($q->a({-href => $basic_url }, 'Hide Options'),
 			$q->hidden(-name => 'advanced', -value => 'on'),
 			$q->checkbox_group(-name => 'feed_ids',
