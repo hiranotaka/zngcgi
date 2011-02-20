@@ -39,8 +39,9 @@ sub update ( $$ ) {
 			    chart_style_file => $config->{chart_style_file},
 			    chart_count => $config->{chart_count});
 
-    for my $feed (@$feeds) {
-	$feed->update($net);
+    my $offset = int rand scalar @$feeds;
+    for my $index ($offset .. $#$feeds, 0 .. $offset - 1) {
+	$feeds->[$index]->update($net);
     }
 
     $net->dispatch($config->{timeout});
