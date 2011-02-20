@@ -130,14 +130,8 @@ sub __parse_content ( $$ ) {
 	$thread_map->{$created} = $thread;
     }
 
-    my $threads = [];
+    $threads = [];
     $feed->{threads} = $threads;
-
-    my $thread_map = {};
-    for my $thread (@$threads) {
-	my $created = $thread->{created};
-	$thread_map->{$created} = $thread;
-    }
 
     my $content = nkf '-w -E -x', $eucjp_content;
     my $lines = [];
