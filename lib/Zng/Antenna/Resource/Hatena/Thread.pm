@@ -14,7 +14,7 @@ sub new ( $$ ) {
 
     my $id = $data->{id};
     my $user_id_re = quotemeta $data->{feed}->{user_id};
-    if ($id =~ /http:\/\/d.hatena.ne.jp\/$user_id_re\/([^#]+)#(.*)/) {
+    if ($id =~ /http:\/\/d.hatena.ne.jp\/$user_id_re\/([^#\/]+)(?:#|\/)(.*)/) {
 	$data->{date} = int $1;
 	$data->{section} = int $2;
     }
@@ -44,7 +44,7 @@ sub link ( $ ) {
     my $user_id = $data->{feed}->{user_id};
     my $date = $data->{date};
     my $section = $data->{section};
-    return "http://d.hatena.ne.jp/$user_id/$date#$section";
+    return "http://d.hatena.ne.jp/$user_id/$date/$section";
 }
 
 sub mobile_link ( $ ) {
