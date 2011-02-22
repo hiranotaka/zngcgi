@@ -217,7 +217,7 @@ sub __parse_content ( $$ ) {
     eval {
 	$document = $parser->parse_string($content, $feed->{url})
     };
-    if ($@ ne '') {
+    if ("$@" ne '') {
 	$feed->{permanent_error} = __PACKAGE__ . ": cannot parse XML: $@";
 	return;
     }
