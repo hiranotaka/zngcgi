@@ -68,7 +68,7 @@ sub html_to_text ( $ ) {
     my $document = eval {
 	$parser->parse_html_string($wrapped_html);
     };
-    if ('' . $@ ne '') {
+    if ("$@" ne '') {
 	return $html;
     }
 
