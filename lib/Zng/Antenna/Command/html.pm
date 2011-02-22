@@ -54,8 +54,8 @@ sub __format_li ( $$$$ ) {
     my $title = $thread->title;
     my $escaped_title = $q->escapeHTML($title);
     $fh->print($q->start_li,
-	       $q->a({-class => 'title', -href => $link,
-		      $is_smartphone ? () : (-title => $title) },
+	       $q->a({-class => 'title', -href => "$link",
+		      $is_smartphone ? () : (-title => "$title") },
 		     $escaped_title), ' ');
 
     my $feed = $thread->feed;
@@ -63,7 +63,7 @@ sub __format_li ( $$$$ ) {
 	my $link = $is_smartphone ? $feed->smartphone_link : $feed->link;
 	my $escaped_title = $q->escapeHTML($feed->title);
 	$fh->print($q->span({-class => 'source'}, '@',
-			    $q->a({-href => $link}, $escaped_title)), ' ');
+			    $q->a({-href => "$link"}, $escaped_title)), ' ');
     }
 
     my $age = $last_modified - $thread->updated;
