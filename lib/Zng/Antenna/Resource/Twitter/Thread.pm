@@ -48,7 +48,7 @@ sub smartphone_link ( $ ) {
     return $self->mobile_link;
 }
 
-sub text_content ( $ ) {
+sub content ( $ ) {
     my $self = shift;
     return $self->{data}->{content};
 }

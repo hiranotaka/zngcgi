@@ -34,7 +34,7 @@ sub link ( $ ) {
     return $self->{data}->{url};
 }
 
-sub text_content ( $ ) {
+sub content ( $ ) {
     return undef;
 }
 

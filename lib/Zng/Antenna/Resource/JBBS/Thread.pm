@@ -55,37 +55,16 @@ sub smartphone_link ( $ ) {
     return "http://jbbs.livedoor.jp/bbs/lite/read.cgi/$directory/$created/l20";
 }
 
-sub base_uri ( $ ) {
-    my $self = shift;
-    my $data = $self->{data};
-    my $directory = $data->{feed}->{directory};
-    my $created = $data->{created};
-    return "http://jbbs.livedoor.jp/bbs/read.cgi/$directory/$created/";
-}
-
-sub text_content ( $ ) {
+sub content ( $ ) {
     my $self = shift;
     my $data = $self->{data};
     my $author = $data->{author};
     my $email = $data->{email};
-    my $content = $data->{text_content};
+    my $content = $data->{content};
     if ($email eq '') {
 	return "$author: $content";
     } else {
 	return "$author <$email>: $content";
-    }
-}
-
-sub html_content ( $ ) {
-    my $self = shift;
-    my $data = $self->{data};
-    my $author = $data->{author};
-    my $email = $data->{email};
-    my $content = $data->{html_content};
-    if ($email eq '') {
-	return "<dl><dt>$author</dt><dd>$content</dd>";
-    } else {
-	return "<dl><dt>$author &lt;$email&gt;</dt><dd>$content</dd>";
     }
 }
 

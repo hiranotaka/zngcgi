@@ -102,10 +102,10 @@ sub __format_li ( $$$ ) {
     my $age_str = $day ? "${day}d" : $hour ? "${hour}h" : "${min}m";
     $content .= $age_str;
 
-    my $text_content = $thread->text_content;
-    if (defined $text_content) {
-	my $text_content = __limit_width 32, __shrink_width $text_content;
-	$content .= ' / ' .  $q->escapeHTML($text_content);
+    my $thread_content = $thread->content;
+    if (defined $thread_content) {
+	my $thread_content = __limit_width 32, __shrink_width $thread_content;
+	$content .= ' / ' .  $q->escapeHTML($thread_content);
     }
 
     $content .= $q->end_li;

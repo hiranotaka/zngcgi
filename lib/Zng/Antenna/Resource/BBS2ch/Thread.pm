@@ -55,37 +55,16 @@ sub mobile_link ( $ ) {
     }
 }
 
-sub base_uri ( $ ) {
-    my $self = shift;
-    my $feed_data = $self->{data}->{feed};
-    my $server = $feed_data->{server};
-    my $directory = $feed_data->{directory};
-    return "$server/$directory/";
-}
-
-sub text_content ( $ ) {
+sub content ( $ ) {
     my $self = shift;
     my $data = $self->{data};
     my $author = $data->{author};
     my $email = $data->{email};
-    my $content = $data->{text_content};
+    my $content = $data->{content};
     if ($email eq '') {
 	return "$author: $content";
     } else {
 	return "$author <$email>: $content";
-    }
-}
-
-sub html_content ( $ ) {
-    my $self = shift;
-    my $data = $self->{data};
-    my $author = $data->{author};
-    my $email = $data->{email};
-    my $content = $data->{html_content};
-    if ($email eq '') {
-	return "<dl><dt>$author</dt><dd>$content</dd>";
-    } else {
-	return "<dl><dt>$author &lt;$email&gt;</dt><dd>$content</dd>";
     }
 }
 

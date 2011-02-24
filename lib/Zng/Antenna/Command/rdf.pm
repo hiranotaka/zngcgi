@@ -27,7 +27,6 @@ sub format ( $$$ ) {
 	       q{<?xml version="1.0" encoding="utf-8"?>},
 	       q{<rdf:RDF xmlns="http://purl.org/rss/1.0/"},
 	       q{ xmlns:dc="http://purl.org/dc/elements/1.1/"},
-	       q{ xmlns:content="http://purl.org/rss/1.0/modules/content/"},
 	       q{ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"},
 	       qq{ xml:lang="$escaped_lang">},
 	       qq{<channel rdf:about="$escaped_id">},
@@ -58,10 +57,7 @@ sub format ( $$$ ) {
 	my $escaped_link = $q->escapeHTML($thread->link);
 	my $updated = $thread->updated;
 	my $formatted_updated =  join 'T', split / /, time2isoz $updated;
-	my $content = $thread->html_content;
-	unless (defined $content) {
-	    $content = $q->escapeHTML($thread->text_content);
-	}
+	my $content = $q->escapeHTML($thread->content);
 	$fh->print(qq{<item rdf:about="$escaped_id">},
 		   qq{<title>$escaped_title</title>},
 		   qq{<link>$escaped_link</link>},
@@ -69,10 +65,7 @@ sub format ( $$$ ) {
 
 	if (defined $content) {
 	    my $escaped_content = $q->escapeHTML($content);
-	    my $escaped_base_uri = $q->escapeHTML($thread->base_uri);
-	    $fh->print(qq{<content:encoded xml:base="$escaped_base_uri">},
-		       $escaped_content,
-		       q{</content:encoded>});
+	    $fh->print(qq{<description>$escaped_content</description>});
 	}
 
 	$fh->print(q{</item>});

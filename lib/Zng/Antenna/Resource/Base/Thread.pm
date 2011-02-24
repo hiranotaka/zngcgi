@@ -12,12 +12,4 @@ sub smartphone_link ( $ ) {
     return $self->link;
 }
 
-sub base_uri ( $ ) {
-    return undef;
-}
-
-sub html_content ( $ ) {
-    return undef;
-}
-
 1;

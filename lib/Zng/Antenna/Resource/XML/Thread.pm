@@ -36,19 +36,9 @@ sub link ( $ ) {
     return $self->{data}->{link};
 }
 
-sub base_uri ( $ ) {
+sub content ( $ ) {
     my $self = shift;
-    return $self->{data}->{base_uri};
-}
-
-sub text_content ( $ ) {
-    my $self = shift;
-    return $self->{data}->{text_content};
-}
-
-sub html_content ( $ ) {
-    my $self = shift;
-    return $self->{data}->{html_content};
+    return $self->{data}->{content};
 }
 
 sub updated ( $ ) {

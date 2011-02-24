@@ -34,8 +34,7 @@ sub __thread_parse_line ( $$ ) {
     $thread->{updated} = $updated;
     $thread->{author} = $author;
     $thread->{email} = $email;
-    $thread->{html_content} = $content;
-    $thread->{text_content} = Zng::Antenna::Updater::html_to_text $content;
+    $thread->{content} = Zng::Antenna::Updater::html_to_text $content;
 }
 
 sub __thread_parse_content ( $$ ) {

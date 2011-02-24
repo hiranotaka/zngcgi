@@ -68,7 +68,7 @@ sub __format_li ( $$$$ ) {
 
     my $age = $last_modified - $thread->updated;
     my $age_info = __age_info $age;
-    my $content = __limit_length 80, $thread->text_content;
+    my $content = __limit_length 80, $thread->content;
     my $escaped_content = $q->escapeHTML($content);
     $fh->print($q->span({-class => $age_info->{class}}, $age_info->{number},
 			$age_info->{unit}, 'ago'),

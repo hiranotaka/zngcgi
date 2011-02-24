@@ -29,7 +29,7 @@ sub __parse_rss_description ( $$ ) {
 
     my $content = $element->textContent;
     $content = substr $content, 0; # strip the utf-8 flag
-    $thread->{text_content} = $content;
+    $thread->{content} = $content;
 }
 
 sub __parse_rss_link ( $$ ) {
@@ -63,9 +63,7 @@ sub __parse_content_encoded ( $$ ) {
     my $content = $element->textContent;
     $content = substr $content, 0; # strip the utf-8 flag
 
-    $thread->{base_uri} = $element->baseURI;
-    $thread->{html_content} = $content;
-    $thread->{text_content} = Zng::Antenna::Updater::html_to_text $content;
+    $thread->{content} = Zng::Antenna::Updater::html_to_text $content;
 }
 
 sub __parse_rdf_about ( $$ ) {

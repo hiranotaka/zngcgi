@@ -46,11 +46,7 @@ sub format ( $$$ ) {
 	my $escaped_link = $q->escapeHTML($thread->link);
 	my $formatted_updated =
 	    join 'T', split / /, time2isoz $thread->updated;
-	my $escaped_base_uri = $q->escapeHTML($thread->base_uri);
-	my $content = $thread->html_content;
-	unless (defined $content) {
-	    $content = $q->escapeHTML($thread->text_content);
-	}
+	my $content = $thread->content;
 	$fh->print(q{<entry>},
 		   qq{<id>$escaped_id</id>},
 		   qq{<title>$escaped_title</title>},
@@ -59,9 +55,7 @@ sub format ( $$$ ) {
 
 	if (defined $content) {
 	    my $escaped_content = $q->escapeHTML($content);
-	    $fh->print(qq{<content type="html" xml:base="$escaped_base_uri">},
-		       $escaped_content,
-		       q{</content>});
+	    $fh->print(qq{<content type="text">$escaped_content</content>});
 	}
 
 	my $feed = $thread->feed;
