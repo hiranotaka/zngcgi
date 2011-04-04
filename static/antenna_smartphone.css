@@ -12,6 +12,7 @@ ol {
   list-style-position: inside;
   margin: 1em 0;
   padding: 0;
+  overflow: hidden;
 }
 ol li {
   border-color: #393;
