@@ -1,7 +1,7 @@
 package Zng::Antenna::Resource::Twitter::Updater;
 
 use strict;
-BEGIN { eval { require bytes; bytes->import; }; }
+use utf8;
 use HTTP::Date qw{str2time};
 use HTTP::Request;
 use HTTP::Status;
@@ -17,14 +17,8 @@ sub __parse_user ( $$ ) {
 	return 0;
     }
 
-    my $user_id = $user->{screen_name};
-    $user_id = substr $user_id, 0; # strip the utf-8 flag
-    $thread->{user_id} = $user_id;
-
-    my $user_name = $user->{name};
-    $user_name = substr $user_name, 0; # strip the utf-8 flag
-    $thread->{user_name} = $user_name;
-
+    $thread->{user_id} = $user->{screen_name};
+    $thread->{user_name} = $user->{name};
     return 1;
 }
 
@@ -43,7 +37,6 @@ sub __parse_status ( $$ ) {
     $thread->{status_id} = int $status->{id};
 
     my $content = $status->{text};
-    $content = substr $content, 0; # strip the utf-8 flag
     $thread->{content} = Zng::Antenna::Updater::html_to_text $content;
 
     __parse_user $thread, $status->{user};
@@ -124,7 +117,7 @@ sub update ( $$ ) {
     my $net = shift;
 
     my $user_id = $feed->{user_id};
-    my $escaped_list_id = uri_escape $feed->{list_id};
+    my $escaped_list_id = uri_escape_utf8 $feed->{list_id};
     my $threads = $feed->{threads} || [];
     my $max_status_id = 1;
     for my $thread (@$threads) {

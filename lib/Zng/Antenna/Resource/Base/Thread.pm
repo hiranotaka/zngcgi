@@ -1,6 +1,7 @@
 package Zng::Antenna::Resource::Base::Thread;
 
 use strict;
+use utf8;
 
 sub mobile_link ( $ ) {
     my $self = shift;

@@ -1,7 +1,8 @@
 package Zng::Antenna::Command::mobile;
 
 use strict;
-use NKF;
+use Encode;
+use Unicode::Normalize;
 use Zng::Antenna;
 
 my $CHAR_RE = qr/[\x00-\x7f]|[\xc0-\xfd][\x80-\xbf]+/;
@@ -144,10 +145,8 @@ sub format ( $$$ ) {
     my $escaped_title = $q->escapeHTML($title);
     my $formatted_last_modified = localtime $last_modified;
 
-    my $sjis_expected_title = $q->param('title');
-    my $expected_title = nkf '-w -S -Z1', $sjis_expected_title;
-    my $normalized_expected_title =
-	nkf '-w -W -Z1 --utf8mac-input', $expected_title;
+    my $expected_title = decode 'shift_jis', $q->param('title');
+    my $normalized_expected_title = NFKC lc $expected_title;
 
     my $page = int $q->param('page');
 
@@ -170,7 +169,7 @@ sub format ( $$$ ) {
     my $has_next = 0;
     for my $thread (@$threads) {
 	my $title = $thread->title;
-	my $normalized_title = nkf '-w -W -Z1 --utf8mac-input', $title;
+	my $normalized_title = NFKC $title;
 	index($normalized_title, $normalized_expected_title) >= 0 or next;
 
 	if ($i >= ($page + 1) * 25) {
@@ -204,7 +203,7 @@ sub format ( $$$ ) {
 
     $content .= $q->end_html;
 
-    my $sjis_content = nkf '-s -W -x', $content;
+    my $sjis_content = encode 'shift_jis', $content;
     $fh->print($q->header(-expires => $last_modified + $config->{expires},
 			  -Content_lengh => length $sjis_content),
 	       $sjis_content);

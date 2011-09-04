@@ -1,7 +1,7 @@
 package Zng::Antenna::Resource::HTML::Updater;
 
 use strict;
-BEGIN { eval { require bytes; bytes->import; }; }
+use utf8;
 use HTTP::Request;
 use HTTP::Status;
 

@@ -1,6 +1,7 @@
 package Zng::Antenna::Resource::XML::StandaloneThread;
 
 use strict;
+use utf8;
 use vars qw{@ISA};
 use CGI;
 use Digest::MD5 qw{md5};

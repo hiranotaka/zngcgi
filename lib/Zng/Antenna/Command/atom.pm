@@ -26,8 +26,9 @@ sub format ( $$$ ) {
     my $formatted_updated = join 'T', split / /, time2isoz $last_modified;
     $fh->print($q->header(-type => 'application/atom+xml',
 			  -charset => 'utf-8',
-			  -expires => $last_modified + $config->{expires}),
-	       qq{<?xml version="1.0" encoding="utf-8"?>},
+			  -expires => $last_modified + $config->{expires}));
+    binmode $fh, 'raw:utf8';
+    $fh->print(qq{<?xml version="1.0" encoding="utf-8"?>},
 	       qq{<feed xmlns="http://www.w3.org/2005/Atom"},
 	       qq{ xml:lang="$escaped_lang">},
 	       qq{<id>$escaped_id</id>},

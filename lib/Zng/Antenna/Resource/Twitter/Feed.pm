@@ -1,7 +1,9 @@
 package Zng::Antenna::Resource::Twitter::Feed;
 
 use strict;
+use utf8;
 use vars qw{@ISA};
+use Encode;
 use Digest::MD5 qw{md5};
 use URI::Escape;
 use Zng::Antenna::Resource::Base::Feed;
@@ -25,7 +27,7 @@ sub id ( $ ) {
 
     my $id = "\xc6\x6a\x45\x6d\x2f\x66\xc2\x5c\xda\x5f\xe1\xd2\x97\xf8\x1b\x59";
     $id = md5($id . $data->{user_id});
-    $id = md5($id . $data->{list_id});
+    $id = md5($id . encode_utf8 $data->{list_id});
     return $id;
 }
 
@@ -39,7 +41,7 @@ sub link ( $ ) {
     my $self = shift;
     my $data = $self->{data};
     my $user_id = $data->{user_id};
-    my $escaped_list_id = uri_escape $data->{list_id};
+    my $escaped_list_id = uri_escape_utf8 $data->{list_id};
     return "http://twitter.com/$user_id/$escaped_list_id";
 }
 

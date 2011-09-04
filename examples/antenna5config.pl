@@ -1,3 +1,4 @@
+use utf8;
 use Zng::Antenna::Resource::BBS2ch::Feed;
 use Zng::Antenna::Resource::HTML::Feed;
 use Zng::Antenna::Resource::Hatena::Feed;

@@ -1,15 +1,15 @@
 package Zng::Antenna::Command::html;
 
 use strict;
-use NKF;
+use utf8;
+use Encode;
+use Unicode::Normalize;
 use Zng::Antenna;
-
-my $CHAR_RE = qr/[\x00-\x7f]|[\xc0-\xfd][\x80-\xbf]+/;
 
 sub __limit_length ( $$ ) {
     my $length = shift;
     my $str = shift;
-    $str =~ /^(?:$CHAR_RE){0,$length}/;
+    $str =~ /^.{0,$length}/;
     return $&;
 }
 
@@ -117,11 +117,8 @@ sub format ( $$$ ) {
 
     my $threads = $content->{threads};
 
-    my $expected_title = $q->param('title');
-    # perl 5.6 does not have Unicode::Normalize.
-    # We use -Z1 --utf8mac-input instead.
-    my $normalized_expected_title =
-	nkf '-w -W -Z1 --utf8mac-input', lc $expected_title;
+    my $expected_title = decode_utf8 $q->param('title');
+    my $normalized_expected_title = NFKC lc $expected_title;
 
     my $advanced = $q->param('advanced');
 
@@ -133,9 +130,9 @@ sub format ( $$$ ) {
     }
 
     my $page = int $q->param('page');
-    my $count = $advanced ? $q->param('count') || 50 : 50;
+    my $count = $advanced ? int($q->param('count')) || 50 : 50;
 
-    my $type = $q->param('type') || 'html';
+    my $type = decode_utf8($q->param('type')) || 'html';
     my $is_smartphone = $type eq 'smartphone';
     my $style_file = $is_smartphone ? 'antenna_smartphone.css' : 'antenna.css';
     my $meta = $is_smartphone ?
@@ -158,8 +155,10 @@ sub format ( $$$ ) {
 		     -type => 'image/png'}) : ()) ];
 
     $fh->print($q->header(-charset => 'utf-8',
-			  -expires => $last_modified + $config->{expires}),
-	       $q->start_html(-encoding => 'utf-8',
+			  -expires => $last_modified + $config->{expires}));
+
+    binmode $fh, 'raw:utf8';
+    $fh->print($q->start_html(-encoding => 'utf-8',
 			      -lang => $config->{lang},
 			      -title => $title,
 			      -style => { -src => "$static_dir/$style_file" },
@@ -208,7 +207,7 @@ sub format ( $$$ ) {
 	$feed_id_selected->{$feed_id} or next;
 
 	my $title = $thread->title;
-	my $normalized_title = nkf '-w -W -Z1 --utf8mac-input', lc $title;
+	my $normalized_title = NFKC lc $title;
 	index($normalized_title, $normalized_expected_title) >= 0 or next;
 
 	if ($i >= ($page + 1) * $count) {

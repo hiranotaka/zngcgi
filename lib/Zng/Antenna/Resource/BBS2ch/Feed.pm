@@ -1,6 +1,7 @@
 package Zng::Antenna::Resource::BBS2ch::Feed;
 
 use strict;
+use utf8;
 use vars qw{@ISA};
 use Digest::MD5 qw{md5};
 use Zng::Antenna::Resource::BBS2ch::Thread;

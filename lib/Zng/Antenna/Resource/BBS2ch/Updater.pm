@@ -1,9 +1,10 @@
 package Zng::Antenna::Resource::BBS2ch::Updater;
 
 use strict;
+use utf8;
+use Encode;
 use HTTP::Request;
 use HTTP::Status;
-use NKF;
 use Time::Local;
 
 sub __thread_parse_line ( $$ ) {
@@ -41,7 +42,7 @@ sub __thread_parse_content ( $$ ) {
     my $thread = shift;
     my $sjis_content = shift;
 
-    my $content = nkf '-w -S -x', $sjis_content;
+    my $content = decode 'shift_jis', $sjis_content;
     my $lines = [ split /\n/, $content ];
     @$lines or return;
     __thread_parse_line $thread, $lines->[$#$lines];
@@ -163,7 +164,7 @@ sub __parse_content ( $$ ) {
     $threads = [];
     $feed->{threads} = $threads;
 
-    my $content = nkf '-w -S -x', $sjis_content;
+    my $content = decode 'shift_jis', $sjis_content;
     my $lines = [ split /\n/, $content ];
     for my $line (@$lines) {
 	my $thread_stub = { feed => $feed };

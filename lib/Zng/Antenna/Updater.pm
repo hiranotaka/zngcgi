@@ -1,7 +1,7 @@
 package Zng::Antenna::Updater;
 
 use strict;
-BEGIN { eval { require bytes; bytes->import; }; }
+use utf8;
 use File::stat;
 use XML::LibXML;
 use Zng::Net;
@@ -73,7 +73,6 @@ sub html_to_text ( $ ) {
     }
 
     my $text = $document->textContent;
-    $text = substr $text, 0; # strip the utf-8 flag
     return $text;
 }
 

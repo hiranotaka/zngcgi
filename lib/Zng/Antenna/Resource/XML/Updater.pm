@@ -1,7 +1,7 @@
 package Zng::Antenna::Resource::XML::Updater;
 
 use strict;
-BEGIN { eval { require bytes; bytes->import; }; }
+use utf8;
 use HTTP::Date qw{str2time};
 use HTTP::Request;
 use HTTP::Status;
@@ -18,18 +18,14 @@ sub __parse_rss_title ( $$ ) {
     my $thread = shift;
     my $element = shift;
 
-    my $title = $element->textContent;
-    $title = substr $title, 0; # strip the utf-8 flag
-    $thread->{title} = $title;
+    $thread->{title} = $element->textContent;
 }
 
 sub __parse_rss_description ( $$ ) {
     my $thread = shift;
     my $element = shift;
 
-    my $content = $element->textContent;
-    $content = substr $content, 0; # strip the utf-8 flag
-    $thread->{content} = $content;
+    $thread->{content} = $element->textContent;
 }
 
 sub __parse_rss_link ( $$ ) {
@@ -37,7 +33,6 @@ sub __parse_rss_link ( $$ ) {
     my $element = shift;
 
     my $content = $element->textContent;
-    $content = substr $content, 0; # strip the utf-8 flag
 
     my $uri = URI->new_abs($content, $element->baseURI);
     if ($uri->scheme ne 'http') {
@@ -61,8 +56,6 @@ sub __parse_content_encoded ( $$ ) {
     my $element = shift;
 
     my $content = $element->textContent;
-    $content = substr $content, 0; # strip the utf-8 flag
-
     $thread->{content} = Zng::Antenna::Updater::html_to_text $content;
 }
 
@@ -70,9 +63,7 @@ sub __parse_rdf_about ( $$ ) {
     my $thread = shift;
     my $element = shift;
 
-    my $id = $element->getAttributeNS(RDF_NS, 'about');
-    $id = substr $id, 0; # strip the utf-8 flag
-    $thread->{id} = $id;
+    $thread->{id} = $element->getAttributeNS(RDF_NS, 'about');
 }
 
 sub __parse_rss_channel ( $$ ) {
@@ -143,7 +134,6 @@ sub __parse_rss2_guid ( $$ ) {
     my $element = shift;
 
     my $id = $element->textContent;
-    $id = substr $id, 0; # strip the utf-8 flag
     $thread->{id} = $id;
 }
 

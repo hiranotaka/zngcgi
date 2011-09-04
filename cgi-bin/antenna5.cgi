@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
+use utf8;
 use FindBin;
 use lib "$FindBin::RealBin/../lib";
 use vars qw{$config};
