@@ -12,9 +12,12 @@ sub new ( $% ) {
     my $class = shift;
     my %options = @_;
 
+    my $file = $options{file};
     bless {
 	updater => $options{updater},
-	file => $options{file},
+	file => $file,
+	part_file => "$file.part",
+	lock_file => "$file.lock",
 	content => undef,
 	last_modified => undef,
 	ttl => $options{ttl},
@@ -48,7 +51,7 @@ sub __lock ( $ ) {
     my $self = shift;
 
     my $file = $self->{file};
-    open my $lock_handle, '>>', "${file}.lock"
+    open my $lock_handle, '>>', $self->{lock_file}
 	or die 'cannot open the lock file';
 
     flock $lock_handle, LOCK_EX
@@ -91,7 +94,7 @@ sub __write_top ( $ ) {
     my $self = shift;
 
     my $file = $self->{file};
-    my $part_file = "${file}.part";
+    my $part_file = $self->{part_file};
     open my $handle, '>', $part_file
 	or die 'cannot open the cache file';
 
