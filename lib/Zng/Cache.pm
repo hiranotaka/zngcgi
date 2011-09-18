@@ -21,54 +21,24 @@ sub new ( $% ) {
     }, $class;
 }
 
-sub updater ( $;$ ) {
+sub content ( $ ) {
     my $self = shift;
-
-    my $updater = $self->{updater};
-    $self->{updater} = shift if @_;
-    return $updater;
+    return $self->{content};
 }
 
-sub file ( $;$ ) {
+sub last_modified ( $ ) {
     my $self = shift;
-
-    my $file = $self->{file};
-    $self->{file} = shift if @_;
-    return $file;
+    return $self->{last_modified};
 }
 
-sub content ( $;$ ) {
-    my $self = shift;
-
-    my $content = $self->{content};
-    $self->{content} = shift if @_;
-    return $content;
-}
-
-sub ttl ( $;$ ) {
-    my $self = shift;
-
-    my $ttl = $self->{ttl};
-    $self->{ttl} = shift if @_;
-    return $ttl;
-}
-
-sub last_modified ( $;$ ) {
-    my $self = shift;
-
-    my $last_modified = $self->{last_modified};
-    $self->{last_modified} = shift if @_;
-    return $last_modified;
-}
-
-sub expired ( $$ )  {
+sub __expired ( $$ )  {
     my $self = shift;
     my $ttl = shift;
 
-    my $last_modified = $self->last_modified;
+    my $last_modified = $self->{last_modified};
     defined $last_modified or return 1;
 
-    my $ttl = $self->ttl;
+    my $ttl = $self->{ttl};
     defined $ttl or return 1;
 
     return $last_modified + $ttl < time;
@@ -77,7 +47,7 @@ sub expired ( $$ )  {
 sub __lock ( $ ) {
     my $self = shift;
 
-    my $file = $self->file;
+    my $file = $self->{file};
     open my $lock_handle, '>>', "${file}.lock"
 	or die 'cannot open the lock file';
 
@@ -94,14 +64,14 @@ sub __stat ( $$ ) {
 	or die 'cannot stat the cache file';
 
     my $last_modified = $stat->mtime;
-    $self->last_modified($last_modified);
+    $self->{last_modified} = $last_modified;
 }
 
 sub __read_top ( $$ ) {
     my $self = shift;
     my $handle = shift;
 
-    my $file = $self->file;
+    my $file = $self->{file};
     open my $handle, '<', $file or return undef;
 
     $self->__stat($handle);
@@ -114,18 +84,18 @@ sub __read_bottom ( $$ ) {
 
     $handle or return;
     my $content = retrieve_fd $handle;
-    $self->content($content);
+    $self->{content} = $content;
 }
 
 sub __write_top ( $ ) {
     my $self = shift;
 
-    my $file = $self->file;
+    my $file = $self->{file};
     my $part_file = "${file}.part";
     open my $handle, '>', $part_file
 	or die 'cannot open the cache file';
 
-    my $content = $self->content;
+    my $content = $self->{content};
     store_fd $content, $handle
 	or die 'cannot store to the cache file';
 
@@ -147,10 +117,10 @@ sub __write_bottom ( $$ ) {
 sub __update ( $ ) {
     my $self = shift;
 
-    my $updater = $self->updater;
-    my $content = $self->content;
+    my $updater = $self->{updater};
+    my $content = $self->{content};
     $content = &$updater($content);
-    $self->content($content);
+    $self->{content} = $content;
 }
 
 sub fetch ( $$$$ ) {
@@ -158,7 +128,7 @@ sub fetch ( $$$$ ) {
 
     # Try to read cache without lock
     my $handle = $self->__read_top;
-    unless ($self->expired) {
+    unless ($self->__expired) {
 	$self->__read_bottom($handle);
 	return;
     }
@@ -167,7 +137,7 @@ sub fetch ( $$$$ ) {
     # Force to read cache with lock
     my $lock_handle = $self->__lock;
     my $handle = $self->__read_top;
-    unless ($self->expired) {
+    unless ($self->__expired) {
 	undef $lock_handle;
 	$self->__read_bottom($handle);
 	return;
