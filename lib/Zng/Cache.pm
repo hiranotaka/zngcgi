@@ -115,7 +115,7 @@ sub __update ( $ ) {
     $self->{content} = &$updater($self->{content});
 }
 
-sub fetch ( $$$$ ) {
+sub fetch ( $ ) {
     my $self = shift;
 
     # Try to read cache without lock
