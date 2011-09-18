@@ -23,24 +23,24 @@ sub id ( $ ) {
     my $self = shift;
     my $data = $self->{data};
 
-    my $id = "\xc6\x6a\x45\x6d\x2f\x66\xc2\x5c\xda\x5f\xe1\xd2\x97\xf8\x1b\x59";
-    $id = md5($id . $data->{user_id});
-    $id = md5($id . $data->{list_id});
+    my $id = "\xc6\x6a\x45\x6d\x2f\x66\xc2\x5c\xda\x5f\xe1\xd2\x97\xf8\x1b\x60";
+    $id = md5($id . $data->{owner_screen_name});
+    $id = md5($id . $data->{slug});
     return $id;
 }
 
 sub title ( $ ) {
     my $self = shift;
-    my $list_id = $self->{data}->{list_id};
+    my $list_id = $self->{data}->{slug};
     return 'Twitter';
 }
 
 sub link ( $ ) {
     my $self = shift;
     my $data = $self->{data};
-    my $user_id = $data->{user_id};
-    my $escaped_list_id = uri_escape $data->{list_id};
-    return "http://twitter.com/$user_id/$escaped_list_id";
+    my $owner_screen_name = $data->{owner_screen_name};
+    my $escaped_slug = uri_escape $data->{slug};
+    return "http://twitter.com/$owner_screen_name/$escaped_slug";
 }
 
 sub threads ( $ ) {
