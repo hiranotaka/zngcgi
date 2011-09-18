@@ -30,7 +30,7 @@ $config = {
 	'currier">2003</a></div>' .
 	'<div># ' . `uptime` . '</div>',
 
-    expires => 300,
+    ttl => 300,
 
     timeout => 4,
 

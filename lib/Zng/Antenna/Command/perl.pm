@@ -14,7 +14,7 @@ sub format ( $$$ ) {
 
     $q->charset('utf-8');
 
-    my $expires = $cache->last_modified + $config->{expires};
+    my $expires = $cache->last_modified + $config->{ttl};
     $fh->print($q->header(-type => 'text/plain', -charset => 'utf-8',
 			  -expires => $expires),
 	       Dumper $cache->content->{feeds});

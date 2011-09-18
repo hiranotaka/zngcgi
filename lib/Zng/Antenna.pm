@@ -23,7 +23,7 @@ sub fetch ( $ ) {
     };
     my $cache = Zng::Cache->new(updater => $updater,
 				file => $config->{cache_file},
-				expires => $config->{expires});
+				ttl => $config->{ttl});
     $cache->fetch;
     return $cache;
 }

@@ -17,7 +17,7 @@ sub new ( $% ) {
 	file => $options{file},
 	content => undef,
 	last_modified => undef,
-	expires => $options{expires},
+	ttl => $options{ttl},
     }, $class;
 }
 
@@ -45,12 +45,12 @@ sub content ( $;$ ) {
     return $content;
 }
 
-sub expires ( $;$ ) {
+sub ttl ( $;$ ) {
     my $self = shift;
 
-    my $expires = $self->{expires};
-    $self->{expires} = shift if @_;
-    return $expires;
+    my $ttl = $self->{ttl};
+    $self->{ttl} = shift if @_;
+    return $ttl;
 }
 
 sub last_modified ( $;$ ) {
@@ -63,15 +63,15 @@ sub last_modified ( $;$ ) {
 
 sub expired ( $$ )  {
     my $self = shift;
-    my $expires = shift;
+    my $ttl = shift;
 
     my $last_modified = $self->last_modified;
     defined $last_modified or return 1;
 
-    my $expires = $self->expires;
-    defined $expires or return 1;
+    my $ttl = $self->ttl;
+    defined $ttl or return 1;
 
-    return $last_modified + $expires < time;
+    return $last_modified + $ttl < time;
 }
 
 sub __lock ( $ ) {

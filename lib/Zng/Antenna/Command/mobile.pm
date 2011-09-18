@@ -205,7 +205,7 @@ sub format ( $$$ ) {
     $content .= $q->end_html;
 
     my $sjis_content = nkf '-s -W -x', $content;
-    $fh->print($q->header(-expires => $last_modified + $config->{expires},
+    $fh->print($q->header(-expires => $last_modified + $config->{ttl},
 			  -Content_lengh => length $sjis_content),
 	       $sjis_content);
 }
