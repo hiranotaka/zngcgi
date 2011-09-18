@@ -62,9 +62,7 @@ sub __stat ( $$ ) {
     my $handle = shift;
 
     my $stat = stat $handle or die "Couldn't stat a file: $!";
-
-    my $last_modified = $stat->mtime;
-    $self->{last_modified} = $last_modified;
+    $self->{last_modified} = $stat->mtime;
 }
 
 sub __open_to_read ( $ ) {
@@ -114,9 +112,7 @@ sub __update ( $ ) {
     my $self = shift;
 
     my $updater = $self->{updater};
-    my $content = $self->{content};
-    $content = &$updater($content);
-    $self->{content} = $content;
+    $self->{content} = &$updater($self->{content});
 }
 
 sub fetch ( $$$$ ) {
