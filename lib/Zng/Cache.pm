@@ -50,11 +50,10 @@ sub __expired ( $$ )  {
 sub __lock ( $ ) {
     my $self = shift;
 
-    open my $lock_handle, '>>', $self->{lock_file}
-        or die 'cannot open the lock file';
-
-    flock $lock_handle, LOCK_EX
-	or die 'cannot get the lock file';
+    my $lock_file = $self->{lock_file};
+    open my $lock_handle, '>>', $lock_file or
+	die "Couldn't open $lock_file: $!";
+    flock $lock_handle, LOCK_EX or die "Couldn't lock a file: $!";
     return $lock_handle;
 }
 
@@ -62,8 +61,7 @@ sub __stat ( $$ ) {
     my $self = shift;
     my $handle = shift;
 
-    my $stat = stat $handle
-	or die 'cannot stat the cache file';
+    my $stat = stat $handle or die "Couldn't stat a file: $!";
 
     my $last_modified = $stat->mtime;
     $self->{last_modified} = $last_modified;
@@ -73,7 +71,11 @@ sub __open_to_read ( $ ) {
     my $self = shift;
 
     my $file = $self->{file};
-    open my $handle, '<', $file or return undef;
+    open my $handle, '<', $file;
+    unless ($handle) {
+	$!{ENOENT} or die "Couldn't open $file: $!";
+	return undef;
+    }
     return $handle;
 }
 
@@ -82,15 +84,16 @@ sub __read ( $$ ) {
     my $handle = shift;
 
     $handle or return;
-    my $content = retrieve_fd $handle;
+    my $content = retrieve_fd $handle or
+	"Couldn't retrieve content from a file: $!";
     $self->{content} = $content;
 }
 
 sub __open_to_write ( $ ) {
     my $self = shift;
 
-    open my $handle, '>', $self->{part_file}
-	or die 'cannot open the cache file';
+    my $part_file = $self->{part_file};
+    open my $handle, '>', $part_file or "Couldn't open $part_file: $!";
     return $handle;
 }
 
@@ -99,14 +102,12 @@ sub __write ( $$ ) {
     my $handle = shift;
 
     my $content = $self->{content};
-    store_fd $content, $handle
-	or die 'cannot store to the cache file';
+    store_fd $content, $handle or die "Couldn't store content to a file: $!";
+    $handle->flush or "Couldn't flush a file: $!";
 
-    $handle->flush
-	or die 'cannot flush to the cache file';
-
-    rename $self->{part_file}, $self->{file}
-	or die 'cannot commit the cache file';
+    my $part_file = $self->{part_file};
+    my $file = $self->{file};
+    rename $part_file, $file or "Couldn't rename $file to $part_file: $!";
 }
 
 sub __update ( $ ) {
