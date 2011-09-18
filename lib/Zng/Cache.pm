@@ -69,18 +69,15 @@ sub __stat ( $$ ) {
     $self->{last_modified} = $last_modified;
 }
 
-sub __read_top ( $$ ) {
+sub __open_to_read ( $ ) {
     my $self = shift;
-    my $handle = shift;
 
     my $file = $self->{file};
     open my $handle, '<', $file or return undef;
-
-    $self->__stat($handle);
     return $handle;
 }
 
-sub __read_bottom ( $$ ) {
+sub __read ( $$ ) {
     my $self = shift;
     my $handle = shift;
 
@@ -89,13 +86,17 @@ sub __read_bottom ( $$ ) {
     $self->{content} = $content;
 }
 
-sub __write_top ( $ ) {
+sub __open_to_write ( $ ) {
     my $self = shift;
 
-    my $file = $self->{file};
-    my $part_file = $self->{part_file};
-    open my $handle, '>', $part_file
+    open my $handle, '>', $self->{part_file}
 	or die 'cannot open the cache file';
+    return $handle;
+}
+
+sub __write ( $$ ) {
+    my $self = shift;
+    my $handle = shift;
 
     my $content = $self->{content};
     store_fd $content, $handle
@@ -103,17 +104,9 @@ sub __write_top ( $ ) {
 
     $handle->flush
 	or die 'cannot flush to the cache file';
-    rename $part_file, $file
+
+    rename $self->{part_file}, $self->{file}
 	or die 'cannot commit the cache file';
-
-    return $handle;
-}
-
-sub __write_bottom ( $$ ) {
-    my $self = shift;
-    my $handle = shift;
-
-    $self->__stat($handle);
 }
 
 sub __update ( $ ) {
@@ -129,31 +122,38 @@ sub fetch ( $$$$ ) {
     my $self = shift;
 
     # Try to read cache without lock
-    my $handle = $self->__read_top;
-    unless ($self->__expired) {
-	$self->__read_bottom($handle);
-	return;
+    my $handle = $self->__open_to_read;
+    if ($handle) {
+	$self->__stat($handle);
+	unless ($self->__expired) {
+	    $self->__read($handle);
+	    return;
+	}
+	undef $handle;
     }
-    undef $handle;
 
     # Force to read cache with lock
     my $lock_handle = $self->__lock;
-    my $handle = $self->__read_top;
-    unless ($self->__expired) {
-	undef $lock_handle;
-	$self->__read_bottom($handle);
-	return;
+    my $handle = $self->__open_to_read;
+    if ($handle) {
+	$self->__stat($handle);
+	unless ($self->__expired) {
+	    undef $lock_handle;
+	    $self->__read($handle);
+	    return;
+	}
+	undef $handle;
+	$self->__read($handle);
     }
-    $self->__read_bottom($handle);
-    undef $handle;
 
     # Update
     $self->__update;
 
     # Write cache
-    my $handle = $self->__write_top;
+    my $handle = $self->__open_to_write;
+    $self->__write($handle);
     undef $lock_handle;
-    $self->__write_bottom($handle);
+    $self->__stat($handle);
 
     return;
 }
