@@ -50,9 +50,8 @@ sub __expired ( $$ )  {
 sub __lock ( $ ) {
     my $self = shift;
 
-    my $file = $self->{file};
     open my $lock_handle, '>>', $self->{lock_file}
-	or die 'cannot open the lock file';
+        or die 'cannot open the lock file';
 
     flock $lock_handle, LOCK_EX
 	or die 'cannot get the lock file';
