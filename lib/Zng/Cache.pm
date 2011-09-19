@@ -155,4 +155,17 @@ sub fetch ( $ ) {
     return;
 }
 
+sub update ( $ ) {
+    my $self = shift;
+
+    my $lock_handle = $self->__lock;
+    my $handle = $self->__open_to_read;
+    if ($handle) {
+	$self->__read($handle);
+	undef $handle;
+    }
+    $self->__update;
+    $self->__write($self->__open_to_write);
+}
+
 1;
