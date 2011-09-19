@@ -69,8 +69,8 @@ sub __open_to_read ( $ ) {
     my $self = shift;
 
     my $file = $self->{file};
-    open my $handle, '<', $file;
-    unless ($handle) {
+    my $handle;
+    unless (open $handle, '<', $file) {
 	$!{ENOENT} or die "Couldn't open $file: $!";
 	return undef;
     }
