@@ -83,7 +83,7 @@ sub __read ( $$ ) {
 
     $handle or return;
     my $content = retrieve_fd $handle or
-	"Couldn't retrieve content from a file: $!";
+	die "Couldn't retrieve content from a file: $!";
     $self->{content} = $content;
 }
 
@@ -91,7 +91,7 @@ sub __open_to_write ( $ ) {
     my $self = shift;
 
     my $part_file = $self->{part_file};
-    open my $handle, '>', $part_file or "Couldn't open $part_file: $!";
+    open my $handle, '>', $part_file or die "Couldn't open $part_file: $!";
     return $handle;
 }
 
@@ -101,11 +101,11 @@ sub __write ( $$ ) {
 
     my $content = $self->{content};
     store_fd $content, $handle or die "Couldn't store content to a file: $!";
-    $handle->flush or "Couldn't flush a file: $!";
+    $handle->flush or die "Couldn't flush a file: $!";
 
     my $part_file = $self->{part_file};
     my $file = $self->{file};
-    rename $part_file, $file or "Couldn't rename $file to $part_file: $!";
+    rename $part_file, $file or die "Couldn't rename $file to $part_file: $!";
 }
 
 sub __update ( $ ) {
