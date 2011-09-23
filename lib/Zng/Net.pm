@@ -69,7 +69,7 @@ sub add_request_addrport ( $$$$ ) {
     $channel->add_request($request, $response_handler);
 }
 
-sub add_request ( $$$;$ ) {
+sub add_request ( $$$ ) {
     my $self = shift;
     my $request = shift;
     my $response_handler = shift;
