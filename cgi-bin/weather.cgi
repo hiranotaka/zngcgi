@@ -341,10 +341,10 @@ my $printers = {
 require './weather.conf';
 
 my $cache_file = $::cache_file || 'cache.dat';
-my $expires = $::expires || 10;
+my $ttl = $::ttl || 10;
 my $cache = Zng::Cache->new(updater => \&update,
 			    file => $cache_file,
-			    expires => $expires);
+			    ttl => $ttl);
 $cache->fetch;
 
 my $type = param('type');

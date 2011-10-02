@@ -68,7 +68,7 @@ sub __format_li ( $$$$ ) {
 
     my $age = $last_modified - $thread->updated;
     my $age_info = __age_info $age;
-    my $content = __limit_length 80, $thread->content;
+    my $content = __limit_length 120, $thread->content;
     my $escaped_content = $q->escapeHTML($content);
     $fh->print($q->span({-class => $age_info->{class}}, $age_info->{number},
 			$age_info->{unit}, 'ago'),
@@ -155,8 +155,7 @@ sub format ( $$$ ) {
 		     -type => 'image/png'}) : ()) ];
 
     $fh->print($q->header(-charset => 'utf-8',
-			  -expires => $last_modified + $config->{expires}));
-
+			  -expires => $last_modified + $config->{ttl}));
     binmode $fh, 'raw:utf8';
     $fh->print($q->start_html(-encoding => 'utf-8',
 			      -lang => $config->{lang},

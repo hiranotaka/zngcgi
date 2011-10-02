@@ -23,7 +23,7 @@ sub format ( $$$ ) {
     my $formatted_updated = join 'T', split / /, time2isoz $last_modified;
     $fh->print($q->header(-type => 'application/rdf+xml',
 			  -charset => 'utf-8',
-			  -expires => $last_modified + $config->{expires}));
+			  -expires => $last_modified + $config->{ttl}));
     binmode $fh, 'raw:utf8';
     $fh->print(q{<?xml version="1.0" encoding="utf-8"?>},
 	       q{<rdf:RDF xmlns="http://purl.org/rss/1.0/"},

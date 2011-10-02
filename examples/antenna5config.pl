@@ -31,7 +31,7 @@ $config = {
 	'currier">2003</a></div>' .
 	'<div># ' . `uptime` . '</div>',
 
-    expires => 300,
+    ttl => 300,
 
     timeout => 4,
 
@@ -84,5 +84,5 @@ $config = {
 	    directory => 'school/18717',
 	    title => '29ちゃんねる' }),
 	Zng::Antenna::Resource::Twitter::Feed->new({
-	    user_id => 'hiranotaka',
-	    list_id => 'CS' }) ] };
+	    owner_screen_name => 'hiranotaka',
+	    slug => 'CS' }) ] };

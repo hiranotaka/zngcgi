@@ -204,7 +204,7 @@ sub format ( $$$ ) {
     $content .= $q->end_html;
 
     my $sjis_content = encode 'shift_jis', $content;
-    $fh->print($q->header(-expires => $last_modified + $config->{expires},
+    $fh->print($q->header(-expires => $last_modified + $config->{ttl},
 			  -Content_lengh => length $sjis_content),
 	       $sjis_content);
 }

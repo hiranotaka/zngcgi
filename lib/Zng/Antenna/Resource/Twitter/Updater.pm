@@ -17,8 +17,9 @@ sub __parse_user ( $$ ) {
 	return 0;
     }
 
-    $thread->{user_id} = $user->{screen_name};
-    $thread->{user_name} = $user->{name};
+    $thread->{id} = $user->{id};
+    $thread->{screen_name} = $user->{screen_name};
+    $thread->{name} = $user->{name};
     return 1;
 }
 
@@ -55,19 +56,19 @@ sub __parse_statuses ( $$ ) {
     my $threads = $feed->{threads} || [];
     my $thread_map = {};
     for my $thread (@$threads) {
-	my $user_id = $thread->{user_id};
-	$thread_map->{$user_id} = $thread;
+	my $id = $thread->{id};
+	$thread_map->{$id} = $thread;
     }
 
     for my $status (@$statuses) {
 	my $new_thread = { feed => $feed };
 	__parse_status $new_thread, $status or return 0;
 
-	my $user_id = $new_thread->{user_id};
-	my $old_thread = $thread_map->{$user_id};
+	my $id = $new_thread->{id};
+	my $old_thread = $thread_map->{$id};
 	!$old_thread ||
 	    $old_thread->{status_id} < $new_thread->{status_id} or next;
-	$thread_map->{$user_id} = $new_thread;
+	$thread_map->{$id} = $new_thread;
     }
 
     $feed->{threads} = [ values %$thread_map ];
@@ -116,8 +117,8 @@ sub update ( $$ ) {
     my $feed = shift;
     my $net = shift;
 
-    my $user_id = $feed->{user_id};
-    my $escaped_list_id = uri_escape_utf8 $feed->{list_id};
+    my $owner_screen_name = $feed->{owner_screen_name};
+    my $escaped_slug = uri_escape_utf8 $feed->{slug};
     my $threads = $feed->{threads} || [];
     my $max_status_id = 1;
     for my $thread (@$threads) {
@@ -125,8 +126,8 @@ sub update ( $$ ) {
 	$max_status_id = $thread->{status_id};
     }
 
-    my $url = "http://api.twitter.com/1/$user_id/lists/$escaped_list_id/" .
-	"statuses.json?since_id=$max_status_id&per_page=200";
+    my $url = "http://api.twitter.com/1/$owner_screen_name/lists/" .
+	"$escaped_slug/statuses.json?since_id=$max_status_id&per_page=200";
     my $request = HTTP::Request->new(GET => $url);
 
     my $handler = sub {

@@ -23,25 +23,25 @@ sub new ( $$ ) {
 sub id ( $ ) {
     my $self = shift;
     my $id = $self->feed->id;
-    $id = md5($id . $self->{data}->{user_id});
+    $id = md5($id . $self->{data}->{id});
     return $id;
 }
 
 sub title ( $ ) {
     my $self = shift;
-    return $self->{data}->{user_name};
+    return $self->{data}->{name};
 }
 
 sub link ( $ ) {
     my $self = shift;
-    my $user_id = $self->{data}->{user_id};
-    return "http://twitter.com/$user_id";
+    my $screen_name = $self->{data}->{screen_name};
+    return "http://twitter.com/$screen_name";
 }
 
 sub mobile_link ( $ ) {
     my $self = shift;
-    my $user_id = $self->{data}->{user_id};
-    return "http://mobile.twitter.com/$user_id";
+    my $screen_name = $self->{data}->{screen_name};
+    return "http://mobile.twitter.com/$screen_name";
 }
 
 sub smartphone_link ( $ ) {
