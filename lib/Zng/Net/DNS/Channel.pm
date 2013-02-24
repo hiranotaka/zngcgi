@@ -18,6 +18,8 @@ sub new ( $$$ ) {
 	listeners => [],
 	addr => undef,
 	errorstring => undef,
+	handle => undef,
+	event => 0,
     };
     bless $self, $class;
 
@@ -27,8 +29,21 @@ sub new ( $$$ ) {
 	return;
     }
 
-    $net->set($handle, POLLIN, $self);
+    $self->{handle} = $handle;
+    $self->{event} = POLLIN;
     return $self;
+}
+
+sub handle ( $ ) {
+    my $self = shift;
+
+    return $self->{handle};
+}
+
+sub event ( $ ) {
+    my $self = shift;
+
+    return $self->{event};
 }
 
 sub add_query ( $$ ) {
@@ -67,12 +82,13 @@ sub __abort ( $$ ) {
 
 sub handle_event ( $$ ) {
     my $self = shift;
-    my $handle = shift;
-    my $type = shift;
+    my $event = shift;
 
-    unless ($type & POLLIN) {
+    my $handle = $self->{handle};
+
+    unless ($event & POLLIN) {
 	my $net = $self->{net};
-	$net->set($handle);
+	$self->{event} = 0;
 	close $handle;
 
 	$self->__abort("$PACKAGE: timeout");
@@ -83,7 +99,7 @@ sub handle_event ( $$ ) {
     my $packet = $resolver->bgread($handle);
 
     my $net = $self->{net};
-    $net->set($handle);
+    $self->{event} = 0;
     close $handle;
 
     unless ($packet) {

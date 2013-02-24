@@ -20,7 +20,6 @@ sub new ( $;% ) {
 	dns_channels => {},
 	http_channels => {},
 	https_channels => {},
-	events => {},
 	logs => [],
 	log_handle => $options{log_handle},
 	chart_dir => $options{chart_dir},
@@ -104,26 +103,6 @@ sub add_request ( $$$ ) {
     return;
 }
 
-sub set ( $$;$$ ) {
-    my $self = shift;
-    my $handle = shift;
-    my $type = shift;
-    my $listener = shift;
-
-    my $events = $self->{events};
-
-    if ($type) {
-	my $event = {
-	    handle => $handle,
-	    type => $type,
-	    listener => $listener,
-	};
-	$events->{$handle} = $event;
-    } else {
-	delete $events->{$handle};
-    }
-}
-
 sub dispatch ( $;$ ) {
     my $self = shift;
     my $timeout = shift;
@@ -133,9 +112,7 @@ sub dispatch ( $;$ ) {
 	@then = gettimeofday;
     }
 
-    my $next_events = $self->{events};
-
-    while (%$next_events) {
+    while (1) {
 	my $poll_timeout;
 	if (defined $timeout) {
 	    my @now = gettimeofday;
@@ -145,10 +122,14 @@ sub dispatch ( $;$ ) {
 	}
 
 	my $poll = new IO::Poll;
-	my @prev_events = values %$next_events;
-	for my $event (@prev_events) {
-	    my $handle = $event->{handle};
-	    my $type = $event->{type};
+	my $channels = [
+	    values %{$self->{dns_channels}},
+	    values %{$self->{http_channels}},
+	    values %{$self->{https_channels}},
+	];
+	for my $channel (@$channels) {
+	    my $handle = $channel->handle;
+	    my $type = $channel->event;
 	    $poll->mask($handle, $type);
 	}
 
@@ -158,20 +139,17 @@ sub dispatch ( $;$ ) {
 	}
 
 	if ($count == 0)  {
-	    foreach my $event (@prev_events) {
-		my $handle = $event->{handle};
-		my $listener = $event->{listener};
-		$listener->handle_event($handle, undef);
+	    for my $channel (@$channels) {
+		$channel->handle_event(0);
 	    }
 	    last;
 	}
 
 	my @handles = $poll->handles;
-	foreach my $event (@prev_events) {
-	    my $handle = $event->{handle};
-	    my $type = $poll->events($handle) or next;
-	    my $listener = $event->{listener};
-	    $listener->handle_event($handle, $type);
+	foreach my $channel (@$channels) {
+	    my $handle = $channel->handle;
+	    my $event = $poll->events($handle) or next;
+	    $channel->handle_event($event);
 	}
     }
 

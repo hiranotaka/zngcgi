@@ -26,6 +26,7 @@ sub new ( $$$$ ) {
 	buffer => undef,
 	offset => 0,
 	stream => undef,
+	event => 0,
     };
     bless $self, $class;
 }
@@ -61,6 +62,18 @@ sub add_request ( $$$ ) {
     }
 }
 
+sub handle ( $ )  {
+    my $self = shift;
+
+    return $self->{stream}->handle;
+}
+
+sub event ( $ ) {
+    my $self = shift;
+
+    return $self->{event};
+}
+
 sub __abort ( $$ ) {
     my $self = shift;
     my $errorstring = shift;
@@ -69,7 +82,7 @@ sub __abort ( $$ ) {
     my $stream = $self->{stream};
 
     if ($stream) {
-	$net->set($stream->handle);
+	$self->{event} = 0;
 	close $stream->handle;
     }
 
@@ -102,7 +115,7 @@ sub __connect ( $ ) {
     }
 
     my $net = $self->{net};
-    $net->set($stream->handle, POLLOUT, $self);
+    $self->{event} = POLLIN | POLLOUT;
 
     $self->{stream} = $stream;
 }
@@ -137,7 +150,7 @@ sub __receive_response_headers ( $ ) {
     $keep_alive &&= @$sending_tasks && @$receiving_tasks == 1;
     if ($keep_alive) {
 	my $net = $self->{net};
-	$net->set($stream->handle, POLLOUT | POLLIN, $self);
+	$self->{event} = POLLOUT | POLLIN;
     }
 
     $self->{response} = $response;
@@ -181,7 +194,7 @@ sub __receive_response_body ( $ ) {
     my $net = $self->{net};
 
     unless ($keep_alive) {
-	$net->set($stream->handle);
+	$self->{event} = 0;
 	close $stream->handle;
 	if (@$sending_tasks) {
 	    $self->__connect;
@@ -272,7 +285,7 @@ sub __send_requests ( $ ) {
     $offset += $count;
     if ($offset == length $buffer) {
 	my $net = $self->{net};
-	$net->set($stream->handle, POLLIN, $self);
+	$self->{event} = POLLIN;
 
 	$buffer = undef;
 	$offset = 0;
@@ -282,37 +295,37 @@ sub __send_requests ( $ ) {
     $self->{offset} = $offset;
 }
 
-sub handle_event ( $$$ ) {
+sub handle_event ( $$ ) {
     my $self = shift;
-    my $handle = shift;
-    my $type = shift;
+    my $event = shift;
 
-    unless ($type) {
+    unless ($event) {
 	$self->__abort("$PACKAGE: timeout");
 	return;
     }
 
+    my $handle = $self->{stream}->handle;
+
     if ($self->{ssl} && !$handle->isa('IO::Socket::SSL')) {
 	my $net = $self->{net};
-	$net->set($handle);
 	if (!IO::Socket::SSL->start_SSL($handle)) {
 	    if ($SSL_ERROR == SSL_WANT_READ) {
-		$net->set($handle, POLLIN, $self);
+		$self->{event} = POLLIN;
 		return;
 	    } elsif ($SSL_ERROR == SSL_WANT_WRITE) {
-		$net->set($handle, POLLOUT, $self);
+		$self->{event} = POLLOUT;
 		return;
 	    } else {
 		$net->abort($SSL_ERROR);
 		return;
 	    }
 	}
-	$net->set($handle, POLLOUT, $self);
+	$self->{event} = POLLIN | POLLOUT;
 	return;
     }
 
-    $self->__send_requests if $type & POLLOUT;
-    $self->__receive_response if $type & POLLIN;
+    $self->__send_requests if $event & POLLOUT;
+    $self->__receive_response if $event & POLLIN;
 }
 
 1;
