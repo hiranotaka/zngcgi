@@ -1,25 +1,26 @@
 package Zng::Net::Stream;
 use strict;
 use vars qw{@ISA};
-use Net::HTTP::NB;
+use Net::HTTP::Methods;
 
-@ISA = qw{Net::HTTP};
+@ISA = qw{Net::HTTP::Methods};
 
 my $PACKAGE = __PACKAGE__;
 
-sub connect {
+sub http_connect {
     my $self = shift;
 
-    $self->blocking(0);
-    unless ($self->SUPER::connect(@_) || $!{EINPROGRESS}) {
+    my $handle = IO::Socket::INET->new;
+    unless ($handle->configure(@_) || $!{EINPROGRESS}) {
 	return undef;
     }
+    ${*$self}{handle} = $handle;
     return $self;
 }
 
 sub sysread {
     my $self = shift;
-    my $count = $self->SUPER::sysread(@_);
+    my $count = ${*$self}{handle}->sysread(@_);
 
     unless (defined $count) {
 	if ($!{EAGAIN}) {
@@ -44,4 +45,10 @@ sub read_entity_body {
 
     ${*$self}{'save'} = $self->_rbuf;
     $self->SUPER::read_entity_body(@_);
+}
+
+sub handle {
+    my $self = shift;
+
+    return ${*$self}{handle};
 }

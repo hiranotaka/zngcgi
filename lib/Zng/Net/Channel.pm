@@ -22,6 +22,7 @@ sub new ( $$ ) {
 	response => undef,
 	buffer => undef,
 	offset => 0,
+	stream => undef,
     };
     bless $self, $class;
 }
@@ -57,16 +58,16 @@ sub add_request ( $$$ ) {
     }
 }
 
-sub __abort ( $$;$ ) {
+sub __abort ( $$ ) {
     my $self = shift;
     my $errorstring = shift;
-    my $handle = shift;
 
     my $net = $self->{net};
+    my $stream = $self->{stream};
 
-    if ($handle) {
-	$net->set($handle);
-	close $handle;
+    if ($stream) {
+	$net->set($stream->handle);
+	close $stream->handle;
     }
 
     my $log = $self->{log};
@@ -89,28 +90,32 @@ sub __connect ( $ ) {
     my $self = shift;
 
     my $addrport = $self->{addrport};
-    my $handle = Zng::Net::Stream->new(KeepAlive => 1,
-				       PeerAddr => $addrport);
-    unless ($handle) {
+    my $stream = Zng::Net::Stream->new(KeepAlive => 1,
+				       PeerAddr => $addrport,
+				       Blocking => 0);
+    unless ($stream) {
 	$self->__abort("$PACKAGE: cannot connect: $@");
 	return;
     }
 
     my $net = $self->{net};
-    $net->set($handle, POLLOUT, $self);
+    $net->set($stream->handle, POLLOUT, $self);
+
+    $self->{stream} = $stream;
 }
 
-sub __receive_response_headers ( $$ ) {
+sub __receive_response_headers ( $ ) {
     my $self = shift;
-    my $handle = shift;
+
+    my $stream = $self->{stream};
 
     my ($code, $message, @headers) = eval {
-	$handle->read_response_headers;
+	$stream->read_response_headers;
     };
     if ($@ eq "Zng::Net::Stream: resource temporarily unavailable\n") {
 	return;
     } elsif ($@) {
-	$self->__abort($@, $handle);
+	$self->__abort($@);
 	return;
     }
 
@@ -123,31 +128,32 @@ sub __receive_response_headers ( $$ ) {
     my $sending_tasks = $self->{sending_tasks};
     my $receiving_tasks = $self->{receiving_tasks};
 
-    my $keep_alive = $handle->peer_http_version eq '1.1';
+    my $keep_alive = $stream->peer_http_version eq '1.1';
     $keep_alive &&= !grep /close/i, @connection;
     $keep_alive ||= grep /keep-alive/i, @connection;
     $keep_alive &&= @$sending_tasks && @$receiving_tasks == 1;
     if ($keep_alive) {
 	my $net = $self->{net};
-	$net->set($handle, POLLOUT | POLLIN, $self);
+	$net->set($stream->handle, POLLOUT | POLLIN, $self);
     }
 
     $self->{response} = $response;
 }
 
-sub __receive_response_body ( $$ ) {
+sub __receive_response_body ( $ ) {
     my $self = shift;
-    my $handle = shift;
+
+    my $stream = $self->{stream};
 
     my $body;
-    my $count = eval { $handle->read_entity_body($body, 8192) };
+    my $count = eval { $stream->read_entity_body($body, 8192) };
     if ($@ eq "Zng::Net::Stream: resource temporarily unavailable\n") {
 	return;
     } elsif ($@) {
-	$self->__abort($@, $handle);
+	$self->__abort($@);
 	return;
     } elsif (!defined $count) {
-	$self->__abort("$PACKAGE: cannot receive: $!", $handle);
+	$self->__abort("$PACKAGE: cannot receive: $!");
 	return;
     }
 
@@ -164,7 +170,7 @@ sub __receive_response_body ( $$ ) {
     my $receiving_tasks = $self->{receiving_tasks};
     my $task = shift @$receiving_tasks;
 
-    my $keep_alive = $handle->peer_http_version eq '1.1';
+    my $keep_alive = $stream->peer_http_version eq '1.1';
     $keep_alive &&= !grep /close/i, @connection;
     $keep_alive ||= grep /keep-alive/i, @connection;
     $keep_alive &&= @$sending_tasks ||  @$receiving_tasks;
@@ -172,8 +178,8 @@ sub __receive_response_body ( $$ ) {
     my $net = $self->{net};
 
     unless ($keep_alive) {
-	$net->set($handle);
-	close $handle;
+	$net->set($stream->handle);
+	close $stream->handle;
 	if (@$sending_tasks) {
 	    $self->__connect;
 	}
@@ -189,20 +195,18 @@ sub __receive_response_body ( $$ ) {
     $self->{response} = undef;
 }
 
-sub __receive_response ( $$ ) {
+sub __receive_response ( $ ) {
     my $self = shift;
-    my $handle = shift;
 
     if (!$self->{response}) {
-	$self->__receive_response_headers($handle);
+	$self->__receive_response_headers;
 	return;
     }
-    $self->__receive_response_body($handle);
+    $self->__receive_response_body;
 }
 
-sub __prepare_send_request ( $$ ) {
+sub __prepare_send_request ( $ ) {
     my $self = shift;
-    my $handle = shift;
 
     my $sending_tasks = $self->{sending_tasks};
     my $task = shift @$sending_tasks;
@@ -223,7 +227,8 @@ sub __prepare_send_request ( $$ ) {
     my @headers;
     $request->scan(sub { push @headers, @_; });
 
-    $self->{buffer} .= $handle->format_request($method, $path_query, @headers);
+    $self->{buffer} .=
+	$self->{stream}->format_request($method, $path_query, @headers);
 
     my $receiving_tasks = $self->{receiving_tasks};
     push @$receiving_tasks, $task;
@@ -233,38 +238,38 @@ sub __prepare_send_request ( $$ ) {
     1;
 }
 
-sub __prepare_send_requests ( $$ ) {
+sub __prepare_send_requests ( $ ) {
     my $self = shift;
-    my $handle = shift;
 
-    if ($handle->peer_http_version ne '1.1') {
-	$self->__prepare_send_request($handle);
+    if ($self->{stream}->peer_http_version ne '1.1') {
+	$self->__prepare_send_request;
 	return;
     }
 
-    1 while ($self->__prepare_send_request($handle));
+    1 while ($self->__prepare_send_request);
 }
 
-sub __send_requests ( $$ ) {
+sub __send_requests ( $ ) {
     my $self = shift;
-    my $handle = shift;
+
+    my $stream = $self->{stream};
 
     unless (defined $self->{buffer}) {
-	$self->__prepare_send_requests($handle);
+	$self->__prepare_send_requests;
     }
 
     my $buffer = $self->{buffer};
     my $offset = $self->{offset};
-    my $count = $handle->syswrite($buffer, undef, $offset);
+    my $count = $stream->handle->syswrite($buffer, undef, $offset);
     unless (defined $count) {
-	$self->__abort("$PACKAGE: cannot send: $!", $handle);
+	$self->__abort("$PACKAGE: cannot send: $!");
 	return;
     }
 
     $offset += $count;
     if ($offset == length $buffer) {
 	my $net = $self->{net};
-	$net->set($handle, POLLIN, $self);
+	$net->set($stream->handle, POLLIN, $self);
 
 	$buffer = undef;
 	$offset = 0;
@@ -280,12 +285,12 @@ sub handle_event ( $$$ ) {
     my $type = shift;
 
     unless ($type) {
-	$self->__abort("$PACKAGE: timeout", $handle);
+	$self->__abort("$PACKAGE: timeout");
 	return;
     }
 
-    $self->__send_requests($handle) if $type & POLLOUT;
-    $self->__receive_response($handle) if $type & POLLIN;
+    $self->__send_requests if $type & POLLOUT;
+    $self->__receive_response if $type & POLLIN;
 }
 
 1;
