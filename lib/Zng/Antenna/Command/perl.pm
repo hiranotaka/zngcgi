@@ -10,9 +10,14 @@ sub format ( $$$ ) {
     my $q = shift;
     my $fh = shift;
 
-    my $cache = Zng::Antenna::fetch $config;
-
     $q->charset('utf-8');
+
+    if ($q->param('secret') ne $config->{secret}) {
+	$fh->print($q->header(-status => '403 Forbidden'));
+	return;
+    }
+
+    my $cache = Zng::Antenna::fetch $config;
 
     my $expires = $cache->last_modified + $config->{ttl};
     $fh->print($q->header(-type => 'text/plain', -charset => 'utf-8',
