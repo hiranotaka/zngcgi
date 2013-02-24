@@ -5,17 +5,20 @@ use Zng::Net::Stream;
 use HTTP::Request;
 use HTTP::Response;
 use IO::Poll qw{POLLIN POLLOUT};
+use IO::Socket::SSL;
 
 my $PACKAGE = __PACKAGE__;
 
-sub new ( $$ ) {
+sub new ( $$$$ ) {
     my $class = shift;
     my $net = shift;
     my $addrport = shift;
+    my $ssl = shift;
 
     my $self = {
 	net => $net,
 	addrport => $addrport,
+	ssl => $ssl,
 	errorstring => undef,
 	sending_tasks => [],
 	receiving_tasks => [],
@@ -286,6 +289,25 @@ sub handle_event ( $$$ ) {
 
     unless ($type) {
 	$self->__abort("$PACKAGE: timeout");
+	return;
+    }
+
+    if ($self->{ssl} && !$handle->isa('IO::Socket::SSL')) {
+	my $net = $self->{net};
+	$net->set($handle);
+	if (!IO::Socket::SSL->start_SSL($handle)) {
+	    if ($SSL_ERROR == SSL_WANT_READ) {
+		$net->set($handle, POLLIN, $self);
+		return;
+	    } elsif ($SSL_ERROR == SSL_WANT_WRITE) {
+		$net->set($handle, POLLOUT, $self);
+		return;
+	    } else {
+		$net->abort($SSL_ERROR);
+		return;
+	    }
+	}
+	$net->set($handle, POLLOUT, $self);
 	return;
     }
 

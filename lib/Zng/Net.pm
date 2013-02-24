@@ -19,6 +19,7 @@ sub new ( $;% ) {
     my $self = {
 	maps => {},
 	channels => {},
+	ssl_channels => {},
 	events => {},
 	logs => [],
 	log_handle => $options{log_handle},
@@ -53,16 +54,17 @@ sub add_query ( $$$ ) {
     $map->add_query($answer_handler);
 }
 
-sub add_request_addrport ( $$$$ ) {
+sub add_request_addrport ( $$$$$ ) {
     my $self = shift;
     my $request = shift;
     my $response_handler = shift;
     my $addrport = shift;
+    my $ssl = shift;
 
-    my $channels = $self->{channels};
+    my $channels = $ssl ? $self->{ssl_channels} : $self->{channels};
     my $channel = $channels->{$addrport};
     unless ($channel) {
-	$channel = Zng::Net::Channel->new($self, $addrport);
+	$channel = Zng::Net::Channel->new($self, $addrport, $ssl);
 	$channels->{$addrport} = $channel;
     }
 
@@ -75,7 +77,8 @@ sub add_request ( $$$ ) {
     my $response_handler = shift;
 
     my $uri = $request->uri;
-    unless ($uri->scheme eq 'http') {
+    my $scheme = $uri->scheme;
+    unless ($scheme eq 'http' || $scheme eq 'https') {
 	$@ = __PACKAGE__ . ': unsupported scheme';
 	&$response_handler(undef);
 	return 1;
@@ -93,7 +96,8 @@ sub add_request ( $$$ ) {
 	    &$response_handler(undef);
 	    return;
 	}
-	$self->add_request_addrport($request, $response_handler, "$addr:$port");
+	$self->add_request_addrport($request, $response_handler, "$addr:$port",
+				    $scheme eq 'https');
     };
 
     $self->add_query($host, $answer_handler);
@@ -173,6 +177,7 @@ sub dispatch ( $;$ ) {
 
     $self->{maps} = {};
     $self->{channels} = {};
+    $self->{ssl_channels} = {};
 
     my $logs = $self->{logs};
 
