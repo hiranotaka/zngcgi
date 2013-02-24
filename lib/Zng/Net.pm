@@ -150,7 +150,7 @@ sub dispatch ( $;$ ) {
 
 	my $count = $poll->poll($poll_timeout);
 	if ($count < 0) {
-	    return 0;
+	    return;
 	}
 
 	if ($count == 0)  {
@@ -177,7 +177,7 @@ sub dispatch ( $;$ ) {
     my $logs = $self->{logs};
 
     my $chart_count = $self->{chart_count};
-    $chart_count > 0 or return 1;
+    $chart_count > 0 or return;
 
     my $chart_dir = $self->{chart_dir};
     my @chart_files = glob File::Spec->catfile($chart_dir, "*.html");
@@ -188,7 +188,7 @@ sub dispatch ( $;$ ) {
     }
 
     my $chart_file = File::Spec->catfile($chart_dir, "$then[0].html");
-    open my $handle, '>', $chart_file or return 1;
+    open my $handle, '>', $chart_file or return;
 
     my $first_time;
     my $last_time;
@@ -263,7 +263,6 @@ sub dispatch ( $;$ ) {
 
     $handle->print($cgi->end_html);
     @$logs = ();
-    return 0;
 }
 
 sub add_log ( $$$ ) {
