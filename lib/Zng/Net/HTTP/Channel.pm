@@ -1,7 +1,7 @@
-package Zng::Net::Channel;
+package Zng::Net::HTTP::Channel;
 
 use strict;
-use Zng::Net::Stream;
+use Zng::Net::HTTP::Stream;
 use HTTP::Request;
 use HTTP::Response;
 use IO::Poll qw{POLLIN POLLOUT};
@@ -93,9 +93,9 @@ sub __connect ( $ ) {
     my $self = shift;
 
     my $addrport = $self->{addrport};
-    my $stream = Zng::Net::Stream->new(KeepAlive => 1,
-				       PeerAddr => $addrport,
-				       Blocking => 0);
+    my $stream = Zng::Net::HTTP::Stream->new(KeepAlive => 1,
+					     PeerAddr => $addrport,
+					     Blocking => 0);
     unless ($stream) {
 	$self->__abort("$PACKAGE: cannot connect: $@");
 	return;
@@ -115,7 +115,7 @@ sub __receive_response_headers ( $ ) {
     my ($code, $message, @headers) = eval {
 	$stream->read_response_headers;
     };
-    if ($@ eq "Zng::Net::Stream: resource temporarily unavailable\n") {
+    if ($@ eq "Zng::Net::HTTP::Stream: resource temporarily unavailable\n") {
 	return;
     } elsif ($@) {
 	$self->__abort($@);
@@ -150,7 +150,7 @@ sub __receive_response_body ( $ ) {
 
     my $body;
     my $count = eval { $stream->read_entity_body($body, 8192) };
-    if ($@ eq "Zng::Net::Stream: resource temporarily unavailable\n") {
+    if ($@ eq "Zng::Net::HTTP::Stream: resource temporarily unavailable\n") {
 	return;
     } elsif ($@) {
 	$self->__abort($@);

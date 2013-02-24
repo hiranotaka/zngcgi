@@ -1,4 +1,4 @@
-package Zng::Net::Map;
+package Zng::Net::DNS::Channel;
 
 use strict;
 use IO::Poll qw{POLLIN};

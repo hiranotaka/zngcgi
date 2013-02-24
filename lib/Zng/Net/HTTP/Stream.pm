@@ -1,4 +1,4 @@
-package Zng::Net::Stream;
+package Zng::Net::HTTP::Stream;
 use strict;
 use vars qw{@ISA};
 use Net::HTTP::Methods;

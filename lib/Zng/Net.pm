@@ -7,8 +7,8 @@ use File::Spec;
 use IO::Poll;
 use Socket;
 use Time::HiRes qw{gettimeofday tv_interval};
-use Zng::Net::Map;
-use Zng::Net::Channel;
+use Zng::Net::DNS::Channel;
+use Zng::Net::HTTP::Channel;
 
 $VERSION = '1.00';
 
@@ -17,9 +17,9 @@ sub new ( $;% ) {
     my %options = @_;
 
     my $self = {
-	maps => {},
-	channels => {},
-	ssl_channels => {},
+	dns_channels => {},
+	http_channels => {},
+	https_channels => {},
 	events => {},
 	logs => [],
 	log_handle => $options{log_handle},
@@ -44,14 +44,14 @@ sub add_query ( $$$ ) {
 	return;
     }
 
-    my $maps = $self->{maps};
-    my $map = $maps->{$host};
-    unless ($map) {
-	$map = Zng::Net::Map->new($self, $host);
-	$maps->{$host} = $map;
+    my $channels = $self->{dns_channels};
+    my $channel = $channels->{$host};
+    unless ($channel) {
+	$channel = Zng::Net::DNS::Channel->new($self, $host);
+	$channels->{$host} = $channel;
     }
 
-    $map->add_query($answer_handler);
+    $channel->add_query($answer_handler);
 }
 
 sub add_request_addrport ( $$$$$ ) {
@@ -61,10 +61,10 @@ sub add_request_addrport ( $$$$$ ) {
     my $addrport = shift;
     my $ssl = shift;
 
-    my $channels = $ssl ? $self->{ssl_channels} : $self->{channels};
+    my $channels = $ssl ? $self->{https_channels} : $self->{http_channels};
     my $channel = $channels->{$addrport};
     unless ($channel) {
-	$channel = Zng::Net::Channel->new($self, $addrport, $ssl);
+	$channel = Zng::Net::HTTP::Channel->new($self, $addrport, $ssl);
 	$channels->{$addrport} = $channel;
     }
 
@@ -175,9 +175,9 @@ sub dispatch ( $;$ ) {
 	}
     }
 
-    $self->{maps} = {};
-    $self->{channels} = {};
-    $self->{ssl_channels} = {};
+    $self->{dns_channels} = {};
+    $self->{http_channels} = {};
+    $self->{https_channels} = {};
 
     my $logs = $self->{logs};
 
