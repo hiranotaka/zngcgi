@@ -15,7 +15,7 @@ sub gen_random_key {
     my $length = shift || 10;
     sysopen my $fh, '/dev/random', O_RDONLY | O_NONBLOCK or die;
     my $buf;
-    $fh->sysread($buf, 10);
+    $fh->sysread($buf, $length);
     return unpack("H*", $buf);
 }
 
