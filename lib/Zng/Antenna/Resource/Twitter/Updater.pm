@@ -215,7 +215,9 @@ sub update ( $$ ) {
 	create_signature_base_string($method, $url_base,
 				     $signature_base_params);
 
-    my $key = join('&', $feed->{consumer_secret}, $feed->{auth_token_secret});
+    my $key = join('&',
+		   map { encode_param($_) }
+		   $feed->{consumer_secret}, $feed->{auth_token_secret});
     $oauth_params->{oauth_signature} =
 	encode_base64(Digest::SHA::hmac_sha1($signature_base, $key));
 
