@@ -1,7 +1,7 @@
 Make the following files and directories under a public directory.
 
 * antenna5.cgi -- symbolic link to zngcgi/cgi-bin/antenna5.cgi
-* antenna5config.pl -- configuration file. see zngcgi/examples/antenna5config.pl
+* .antenna5.conf -- configuration file. see zngcgi/examples/antenna5.conf
 * static -- symbolic link to zngcgi/static
 * analysis -- empty directory if necessary
 
