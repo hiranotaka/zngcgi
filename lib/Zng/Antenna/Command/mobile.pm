@@ -2,6 +2,7 @@ package Zng::Antenna::Command::mobile;
 
 use strict;
 use Encode;
+use NKF;
 use Unicode::Normalize;
 use Zng::Antenna;
 
@@ -203,7 +204,7 @@ sub format ( $$$ ) {
 
     $content .= $q->end_html;
 
-    my $sjis_content = encode 'shift_jis', $content;
+    my $sjis_content = nkf '-s -W -x', encode_utf8 $content;
     $fh->print($q->header(-expires => $last_modified + $config->{ttl},
 			  -Content_lengh => length $sjis_content),
 	       $sjis_content);

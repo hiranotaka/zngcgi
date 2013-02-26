@@ -3,6 +3,7 @@ package Zng::Antenna::Resource::JBBS::Updater;
 use strict;
 use utf8;
 use Encode;
+use NKF;
 use HTTP::Request;
 use HTTP::Status;
 use Time::Local;
@@ -35,7 +36,7 @@ sub __thread_parse_content ( $$ ) {
     my $thread = shift;
     my $eucjp_content = shift;
 
-    my $content = decode 'euc-jp', $eucjp_content;
+    my $content = decode_utf8 nkf '-w -E -x', $eucjp_content;
     my $lines = [ split /\n/, $content ];
     @$lines or return;
     __thread_parse_line $thread, $lines->[$#$lines];
