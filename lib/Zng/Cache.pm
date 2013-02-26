@@ -139,8 +139,8 @@ sub fetch ( $ ) {
 	    $self->__read($handle);
 	    return;
 	}
-	undef $handle;
 	$self->__read($handle);
+	undef $handle;
     }
 
     # Update
