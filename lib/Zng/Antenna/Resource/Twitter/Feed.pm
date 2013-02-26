@@ -25,7 +25,7 @@ sub id ( $ ) {
     my $self = shift;
     my $data = $self->{data};
 
-    my $id = "\xc6\x6a\x45\x6d\x2f\x66\xc2\x5c\xda\x5f\xe1\xd2\x97\xf8\x1b\x60";
+    my $id = "\xc6\x6a\x45\x6d\x2f\x66\xc2\x5c\xda\x5f\xe1\xd2\x97\xf8\x1b\x61";
     $id = md5($id . $data->{owner_screen_name});
     $id = md5($id . encode_utf8 $data->{slug});
     return $id;
