@@ -1,7 +1,10 @@
 package Zng::Antenna;
 
 use strict;
+use vars qw{$VERSION};
 use Zng::Cache;
+
+$VERSION = "5.1";
 
 sub hex_id ( $ ) {
     my $id = shift;
