@@ -25,7 +25,7 @@ sub formatter ( $ ) {
 
 my $q = CGI->new;
 eval {
-    require './antenna5config.pl';
+    require './.antenna5.conf';
     my $type = $q->param('type');
     my $formatter = formatter $type;
     unless (defined $formatter) {
