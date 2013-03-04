@@ -11,70 +11,38 @@ use Digest::SHA;
 use MIME::Base64;
 use Fcntl;
 
-sub gen_random_key {
-    my $length = shift || 10;
+sub __generate_nonce {
     sysopen my $fh, '/dev/random', O_RDONLY | O_NONBLOCK or die;
     my $buf;
-    $fh->sysread($buf, $length);
+    $fh->sysread($buf, 8);
     return unpack("H*", $buf);
 }
 
-sub encode_param {
-    my $param = shift;
-    URI::Escape::uri_escape_utf8($param, '^\w.~-');
+sub __generate_signature_base_string ( $$ ) {
+    my $url = shift;
+    my $oauth_params = shift;
+
+    my $params = { $url->query_form, %$oauth_params };
+    my $joined_params =
+	join('&', map({ uri_escape($_) . '=' . uri_escape($params->{$_}) }
+		      sort({ uri_escape($a) cmp uri_escape($b) }
+			   keys %$params)));
+
+    my $url_base = $url->as_string;
+    $url_base =~ s/\?.*//;
+
+    return join '&', map { uri_escape $_ } 'GET', $url_base, $joined_params;
 }
 
-sub create_signature_base_string {
-    my ($method, $url, $params) = @_;
-    $method = uc $method;
-    $params = {%$params};
-    delete $params->{oauth_signature};
-    delete $params->{realm};
-    my $normalized_request_url = normalize_request_url($url);
-    my $normalized_params = normalize_params($params);
-    my $signature_base_string = join('&', map(encode_param($_),
-        $method, $normalized_request_url, $normalized_params));
-    $signature_base_string;
-}
-
-sub normalize_request_url {
-    my $uri = shift;
-    $uri = URI->new($uri) unless (ref $uri && ref $uri eq 'URI');
-    unless (lc $uri->scheme eq 'http' || lc $uri->scheme eq 'https') {
-        Carp::croak qq/Invalid request url, "$uri"/;
-    }
-    my $port = $uri->port;
-    my $request_url = ($port && ($port == 80 || $port == 443))
-        ? sprintf(q{%s://%s%s}, lc($uri->scheme), lc($uri->host), $uri->path)
-        : sprintf(q{%s://%s:%d%s}, lc($uri->scheme), lc($uri->host), $port, $uri->path);
-    $request_url;
-}
-
-sub build_auth_header {
-    my ($realm, $params) = @_;
-    my $head = sprintf q{OAuth realm="%s"}, $realm || '';
-    my $authorization_header = join(', ', $head,
-        sort { $a cmp $b } map(sprintf(q{%s="%s"}, encode_param($_), encode_param($params->{$_})),
-            grep { /^x?oauth_/ } keys %$params));
-    $authorization_header;
-}
-
-sub normalize_params {
+sub __generate_auth_header ( $ ) {
     my $params = shift;
-    my @pairs = ();
-    for my $k (sort keys %$params) {
-        if (!ref $params->{$k}) {
-            push @pairs, 
-                sprintf(q{%s=%s}, encode_param($k), encode_param($params->{$k}));
-        }
-        elsif (ref $params->{$k} eq 'ARRAY') {
-            for my $v (sort @{ $params->{$k} }) {
-                push @pairs, 
-                    sprintf(q{%s=%s}, encode_param($k), encode_param($v));
-            }
-        }
-    }
-    return join('&', @pairs);
+
+    my $escaped_params =
+	join(', ', 
+	     map({ uri_escape($_) . '="' . uri_escape($params->{$_}) . '"' }
+		 keys %$params));
+
+    return 'OAuth ' . $escaped_params;
 }
 
 sub __parse_user ( $$ ) {
@@ -193,39 +161,34 @@ sub update ( $$ ) {
 	$max_status_id = $thread->{status_id};
     }
 
-    my $method = 'GET';
-    my $url_base = "http://api.twitter.com/1.1/lists/statuses.json";
-
-    my $url_params = {
-	slug => $feed->{slug},
-	owner_screen_name => $feed->{owner_screen_name},
-    };
+    my $owner_screen_name = $feed->{owner_screen_name};
+    my $escaped_slug = uri_escape_utf8 $feed->{slug};
+    my $url = URI->new("http://api.twitter.com/1.1/lists/statuses.json?" .
+		       "owner_screen_name=$owner_screen_name&" .
+		       "slug=$escaped_slug");
 
     my $oauth_params = {
 	oauth_consumer_key => $feed->{consumer_key},
 	oauth_timestamp => time,
-	oauth_nonce => gen_random_key,
+	oauth_nonce => __generate_nonce,
 	oauth_version => '1.0',
 	oauth_token => $feed->{auth_token},
 	oauth_signature_method => 'HMAC-SHA1',
     };
 
-    my $signature_base_params = {%$oauth_params, %$url_params};
     my $signature_base =
-	create_signature_base_string($method, $url_base,
-				     $signature_base_params);
-
-    my $key = join('&',
-		   map { encode_param($_) }
-		   $feed->{consumer_secret}, $feed->{auth_token_secret});
+	__generate_signature_base_string($url, $oauth_params);
+    my $key = join '&', map({ uri_escape $_ }
+			    $feed->{consumer_secret},
+			    $feed->{auth_token_secret});
     $oauth_params->{oauth_signature} =
 	encode_base64(Digest::SHA::hmac_sha1($signature_base, $key));
 
-    my $url = $url_base . '?' . normalize_params($url_params);
     my $header = [
-	'Authorization' => build_auth_header('', $oauth_params),
+	'Authorization' => __generate_auth_header($oauth_params),
     ];
-    my $request = HTTP::Request->new($method, $url, $header);
+
+    my $request = HTTP::Request->new(GET => $url, $header);
 
     my $handler = sub {
 	my $response = shift;
