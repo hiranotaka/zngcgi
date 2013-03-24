@@ -9,6 +9,8 @@ sub __handle_response ( $$ ) {
     my $feed = shift;
     my $response = shift;
 
+    $feed->{temporary_error} = undef;
+
     unless ($response) {
 	$feed->{temporary_error} = $@;
 	return;
@@ -21,8 +23,6 @@ sub __handle_response ( $$ ) {
 	$feed->{temporary_error} = "unexpected HTTP status $code";
 	return;
     }
-
-    $feed->{temporary_error} = undef;
 }
 
 sub update ( $$ ) {

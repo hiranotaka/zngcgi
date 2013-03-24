@@ -63,6 +63,8 @@ sub __thread_parse_response ( $$ ) {
     my $thread = shift;
     my $response = shift;
 
+    $thread->{temporary_error} = undef;
+
     unless ($response) {
 	$thread->{temporary_error} = $@;
 	return;
@@ -86,7 +88,6 @@ sub __thread_parse_response ( $$ ) {
     }
 
     $thread->{updated} = $response->last_modified;
-    $thread->{temporary_error} = undef;
 }
 
 sub __thread_handle_response ( $$ ) {
@@ -185,6 +186,8 @@ sub __parse_response ( $$ ) {
     my $feed = shift;
     my $response = shift;
 
+    $feed->{temporary_error} = undef;
+
     unless ($response) {
 	$feed->{temporary_error} = $@;
 	return;
@@ -199,8 +202,6 @@ sub __parse_response ( $$ ) {
 	$feed->{temporary_error} = "unexpected HTTP status $code";
 	return;
     }
-
-    $feed->{temporary_error} = undef;
 }
 
 sub __handle_response ( $$$ ) {

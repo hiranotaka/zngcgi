@@ -116,6 +116,8 @@ sub __parse_content ( $$ ) {
     my $feed = shift;
     my $content = shift;
 
+    $feed->{permanent_error} = undef;
+
     my $statuses;
     eval {
 	$statuses = decode_json $content;
@@ -126,13 +128,13 @@ sub __parse_content ( $$ ) {
     }
 
     __parse_statuses $feed, $statuses or return;
-
-    $feed->{permanent_error} = undef;
 }
 
 sub __handle_response ( $$ ) {
     my $feed = shift;
     my $response = shift;
+
+    $feed->{temporary_error} = undef;
 
     unless ($response) {
 	$feed->{temporary_error} = $@;
@@ -146,8 +148,6 @@ sub __handle_response ( $$ ) {
 	$feed->{temporary_error} = "unexpected HTTP status $code";
 	return;
     }
-
-    $feed->{temporary_error} = undef;
 }
 
 sub update ( $$ ) {
