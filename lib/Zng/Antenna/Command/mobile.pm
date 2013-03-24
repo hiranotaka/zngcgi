@@ -1,21 +1,20 @@
 package Zng::Antenna::Command::mobile;
 
 use strict;
+use utf8;
 use Encode;
 use NKF;
 use Unicode::Normalize;
 use Zng::Antenna;
 
-my $CHAR_RE = qr/[\x00-\x7f]|[\xc0-\xfd][\x80-\xbf]+/;
-my $HALFWIDTH_CHAR_RE =
-    qr/[\x20-\x7e]|\xef\xbd[\xa1-\xbf]|\xef\xbe[\x80-\x9f]/;
+my $HALFWIDTH_CHAR_RE = qr/[\x20-\x7e]|[\x{ff61}-\x{ff9f}]/;
 
 sub __limit_width ( $$ ) {
     my $width = shift;
     my $str = shift;
 
     my $length;
-    while ($str =~ /$CHAR_RE/g) {
+    while ($str =~ /./g) {
 	if ($& =~ /^$HALFWIDTH_CHAR_RE$/) {
 	    $width--;
 	} else {
