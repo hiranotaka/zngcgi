@@ -38,7 +38,7 @@ sub __generate_auth_header ( $ ) {
     my $params = shift;
 
     my $escaped_params =
-	join(', ', 
+	join(', ',
 	     map({ uri_escape($_) . '="' . uri_escape($params->{$_}) . '"' }
 		 keys %$params));
 
