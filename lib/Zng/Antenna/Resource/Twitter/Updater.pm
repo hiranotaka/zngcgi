@@ -77,7 +77,7 @@ sub __parse_status ( $$ ) {
     my $content = $status->{text};
     $thread->{content} = Zng::Antenna::Updater::html_to_text $content;
 
-    __parse_user $thread, $status->{user};
+    __parse_user $thread, $status->{user} or return 0;
     return 1;
 }
 
