@@ -69,6 +69,11 @@ sub __parse_status ( $$ ) {
 	return 0;
     }
 
+    if ($status->{source} eq
+	'<a href="http://twittbot.net/" rel="nofollow">twittbot.net</a>') {
+	return 0;
+    }
+
     my $created_at = $status->{created_at};
     $created_at =~ s/\+0000/GMT/;
     $thread->{updated} = str2time $created_at;
@@ -99,7 +104,7 @@ sub __parse_statuses ( $$ ) {
 
     for my $status (@$statuses) {
 	my $new_thread = { feed => $feed };
-	__parse_status $new_thread, $status or return 0;
+	__parse_status $new_thread, $status or next;
 
 	my $id = $new_thread->{id};
 	my $old_thread = $thread_map->{$id};
