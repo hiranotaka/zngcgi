@@ -168,10 +168,11 @@ sub update ( $$ ) {
 
     my $owner_screen_name = $feed->{owner_screen_name};
     my $escaped_slug = uri_escape_utf8 $feed->{slug};
-    my $url = URI->new("http://api.twitter.com/1.1/lists/statuses.json?" .
+    my $url = URI->new('http://api.twitter.com/1.1/lists/statuses.json?' .
 		       "owner_screen_name=$owner_screen_name&" .
 		       "slug=$escaped_slug&" .
-		       "since_id=$max_status_id&per_page=200");
+		       "since_id=$max_status_id&per_page=200&" .
+		       'include_rts=false');
 
     my $oauth_params = {
 	oauth_consumer_key => $feed->{consumer_key},
