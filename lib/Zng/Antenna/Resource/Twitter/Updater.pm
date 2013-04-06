@@ -69,8 +69,11 @@ sub __parse_status ( $$ ) {
 	return 0;
     }
 
-    if ($status->{source} eq
-	'<a href="http://twittbot.net/" rel="nofollow">twittbot.net</a>') {
+    my $source = $status->{source};
+    if ($source eq
+	'<a href="http://twittbot.net/" rel="nofollow">twittbot.net</a>' ||
+	$source eq
+	'<a href="http://makebot.sh/" rel="nofollow">makebot.sh 4</a>') {
 	return 0;
     }
 
