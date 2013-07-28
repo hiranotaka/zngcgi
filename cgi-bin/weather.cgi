@@ -45,6 +45,8 @@ sub parse_png {
     require GD;
     my $image = GD::Image->new($content) or return;
 
+    my $offset = $image->height - 455;
+
     my $forecasts = [{min => 80, max => undef},
 		     {min => 50, max => 80},
 		     {min => 30, max => 50},
@@ -58,7 +60,7 @@ sub parse_png {
     my $y = 287;
     my $color_forecasts = {};
     for my $forecast (@$forecasts) {
-	my $color = $image->getPixel($x, $y);
+	my $color = $image->getPixel($x, $y + $offset);
 	$color_forecasts->{$color} = $forecast;
 	$y += 19;
     }
@@ -69,7 +71,7 @@ sub parse_png {
     my $spot_forecasts;;
     for my $index (0..$#$spots) {
 	my $spot = $spots->[$index];
-	my $color = $image->getPixel($spot->{x}, $spot->{y});
+	my $color = $image->getPixel($spot->{x}, $spot->{y} + $offset);
 	my $forecast = $color_forecasts->{$color} || $default_forecast;
 	$spot_forecasts->[$index] = $forecast;
     }
