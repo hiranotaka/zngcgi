@@ -82,7 +82,7 @@ sub __thread_update ( $$ ) {
     my $created = $thread->{created};
     my $num_messages = $thread->{num_messages};
 
-    my $url = "http://jbbs.livedoor.jp/bbs/rawmode.cgi/$directory/$created/" .
+    my $url = "http://jbbs.shitaraba.net/bbs/rawmode.cgi/$directory/$created/" .
 	"$num_messages";
     my $request = HTTP::Request->new(GET => $url);
 
@@ -189,7 +189,7 @@ sub update ( $$ ) {
 
     my $directory = $feed->{directory};
 
-    my $url = "http://jbbs.livedoor.jp/$directory/subject.txt";
+    my $url = "http://jbbs.shitaraba.net/$directory/subject.txt";
     my $request = HTTP::Request->new(GET => $url);
     $request->if_modified_since($feed->{http_last_modified});
 

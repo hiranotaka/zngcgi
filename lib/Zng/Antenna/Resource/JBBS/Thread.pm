@@ -37,7 +37,7 @@ sub link ( $ ) {
     my $data = $self->{data};
     my $directory = $data->{feed}->{directory};
     my $created = $data->{created};
-    return "http://jbbs.livedoor.jp/bbs/read.cgi/$directory/$created/l20";
+    return "http://jbbs.shitaraba.net/bbs/read.cgi/$directory/$created/l20";
 }
 
 sub mobile_link ( $ ) {
@@ -45,7 +45,7 @@ sub mobile_link ( $ ) {
     my $data = $self->{data};
     my $directory = $data->{feed}->{directory};
     my $created = $data->{created};
-    return "http://jbbs.livedoor.jp/bbs/i.cgi/$directory/$created/n";
+    return "http://jbbs.shitaraba.net/bbs/i.cgi/$directory/$created/n";
 }
 
 sub smartphone_link ( $ ) {

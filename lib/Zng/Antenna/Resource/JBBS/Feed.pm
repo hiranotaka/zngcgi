@@ -37,7 +37,7 @@ sub link ( $ ) {
     my $self = shift;
     my $data = $self->{data};
     my $directory = $data->{directory};
-    return "http://jbbs.livedoor.jp/$directory/";
+    return "http://jbbs.shitaraba.net/$directory/";
 }
 
 sub smartphone_link ( $ ) {
