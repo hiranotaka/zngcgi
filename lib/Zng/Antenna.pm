@@ -4,7 +4,7 @@ use strict;
 use vars qw{$VERSION};
 use Zng::Cache;
 
-$VERSION = '5.1.5';
+$VERSION = '5.1.6';
 
 sub hex_id ( $ ) {
     my $id = shift;
