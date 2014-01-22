@@ -99,6 +99,9 @@ sub __abort ( $$ ) {
 	&$listener(undef);
     }
 
+    $self->{sending_tasks} = [];
+    $self->{receiving_tasks} = [];
+
     $self->{errorstring} = $errorstring;
 }
 
@@ -316,7 +319,7 @@ sub handle_event ( $$ ) {
 		$self->{event} = POLLOUT;
 		return;
 	    } else {
-		$net->abort($SSL_ERROR);
+		$self->__abort($SSL_ERROR);
 		return;
 	    }
 	}
