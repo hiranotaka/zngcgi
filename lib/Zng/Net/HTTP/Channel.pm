@@ -9,7 +9,7 @@ use IO::Socket::SSL;
 
 my $PACKAGE = __PACKAGE__;
 
-sub new ( $$$$ ) {
+sub new ( $$$$$ ) {
     my $class = shift;
     my $net = shift;
     my $addrport = shift;
@@ -311,7 +311,8 @@ sub handle_event ( $$ ) {
 
     if ($self->{ssl} && !$handle->isa('IO::Socket::SSL')) {
 	my $net = $self->{net};
-	if (!IO::Socket::SSL->start_SSL($handle)) {
+	if (!IO::Socket::SSL->start_SSL($handle,
+					SSL_ca_file => $net->ssl_ca_file)) {
 	    if ($SSL_ERROR == SSL_WANT_READ) {
 		$self->{event} = POLLIN;
 		return;

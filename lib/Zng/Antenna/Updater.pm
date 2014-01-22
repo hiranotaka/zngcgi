@@ -37,7 +37,8 @@ sub update ( $$ ) {
     my $net = Zng::Net->new(log_handle => $log_handle,
 			    chart_dir => $config->{chart_dir},
 			    chart_style_file => $config->{chart_style_file},
-			    chart_count => $config->{chart_count});
+			    chart_count => $config->{chart_count},
+			    ssl_ca_file => $config->{ssl_ca_file});
 
     my $offset = int rand scalar @$feeds;
     for my $index ($offset .. $#$feeds, 0 .. $offset - 1) {

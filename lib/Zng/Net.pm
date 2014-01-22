@@ -25,6 +25,7 @@ sub new ( $;% ) {
 	chart_dir => $options{chart_dir},
 	chart_style_file => $options{chart_style_file},
 	chart_count => $options{chart_count},
+	ssl_ca_file => $options{ssl_ca_file},
     };
     bless $self, $class;
 }
@@ -272,6 +273,11 @@ sub add_log ( $$$ ) {
 	my $logs = $self->{logs};
 	push @$logs, $log;
     }
+}
+
+sub ssl_ca_file ( $ ) {
+  my $self = shift;
+  return $self->{ssl_ca_file};
 }
 
 1;
