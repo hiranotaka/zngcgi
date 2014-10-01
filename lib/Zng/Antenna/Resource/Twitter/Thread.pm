@@ -38,12 +38,6 @@ sub link ( $ ) {
     return "http://twitter.com/$screen_name";
 }
 
-sub mobile_link ( $ ) {
-    my $self = shift;
-    my $screen_name = $self->{data}->{screen_name};
-    return "http://mobile.twitter.com/$screen_name";
-}
-
 sub smartphone_link ( $ ) {
     my $self = shift;
     return $self->mobile_link;
