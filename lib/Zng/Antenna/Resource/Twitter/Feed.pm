@@ -42,7 +42,7 @@ sub link ( $ ) {
     my $data = $self->{data};
     my $owner_screen_name = $data->{owner_screen_name};
     my $escaped_slug = uri_escape_utf8 $data->{slug};
-    return "http://twitter.com/$owner_screen_name/$escaped_slug";
+    return "http://twitter.com/$owner_screen_name/lists/$escaped_slug";
 }
 
 sub threads ( $ ) {
