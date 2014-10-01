@@ -5,6 +5,7 @@ use utf8;
 use FindBin;
 use lib "$FindBin::RealBin/../lib";
 use vars qw{$config};
+use IO::Handle;
 use CGI;
 
 sub formatter ( $ ) {
@@ -29,8 +30,8 @@ eval {
     my $type = $q->param('type');
     my $formatter = formatter $type;
     unless (defined $formatter) {
-	require Zng::Antenna::Command::html;
-	$formatter = \&Zng::Antenna::Command::html::format;
+	require Zng::Antenna::Command::auto;
+	$formatter = \&Zng::Antenna::Command::auto::format;
     }
     &$formatter($config, $q, \*STDOUT);
 };

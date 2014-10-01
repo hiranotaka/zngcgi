@@ -43,13 +43,13 @@ sub __age_info ( $ ) {
     };
 }
 
-sub __format_li ( $$$$ ) {
+sub __format_li ( $$$$$ ) {
     my $last_modified = shift;
     my $thread = shift;
     my $q = shift;
     my $fh = shift;
+    my $is_smartphone = shift;
 
-    my $is_smartphone = $q->param('type') eq 'smartphone';
     my $link = $is_smartphone ? $thread->smartphone_link : $thread->link;
     my $title = $thread->title;
     my $escaped_title = $q->escapeHTML($title);
@@ -88,10 +88,11 @@ sub __format_page_link ( $$$$ ) {
     $fh->print($q->a({ href => $url }, $content));
 }
 
-sub format ( $$$ ) {
+sub format ( $$$;$ ) {
     my $config = shift;
     my $q = shift;
     my $fh = shift;
+    my $is_smartphone = shift;
 
     my $cache = Zng::Antenna::fetch $config;
 
@@ -132,8 +133,7 @@ sub format ( $$$ ) {
     my $page = int $q->param('page');
     my $count = $advanced ? int($q->param('count')) || 50 : 50;
 
-    my $type = decode_utf8($q->param('type')) || 'html';
-    my $is_smartphone = $type eq 'smartphone';
+    my $type = decode_utf8($q->param('type')) || 'auto';
     my $style_file = $is_smartphone ? 'antenna_smartphone.css' : 'antenna.css';
     my $meta = $is_smartphone ?
 	{ viewport => 'width=device-width, user-scalable=no' } : {};
@@ -166,13 +166,13 @@ sub format ( $$$ ) {
 	       $q->h1($escaped_title),
 	       $q->div({-class => 'nav'},
 		       scalar localtime $last_modified, '|',
-		       $is_smartphone ?
-		       ($q->a({-href => "$url"}, 'Normal'), '|',
-			$q->strong('Smartphone')) :
-		       ($q->strong('Normal'), '|',
-			$q->a({-href => "$url?type=smartphone"},
-			      'Smartphone')), '|',
-		       $q->a({-href => "$url?type=mobile"}, 'Mobile'), '|',
+		       $type eq 'auto' ? $q->strong('Auto') :
+		       $q->a({-href => "$url"}, 'Auto'), '|',
+		       $type eq 'html' ? $q->strong('Normal') :
+		       $q->a({-href => "$url?type=html"}, 'Normal'), '|',
+		       $type eq 'smartphone' ? $q->strong('Smartphone') :
+		       $q->a({-href => "$url?type=smartphone"}, 'Smartphone'),
+		       '|', $q->a({-href => "$url?type=mobile"}, 'Mobile'), '|',
 		       $q->a({-href => $config->{chart_dir}}, 'Analysis')),
 	       $config->{nav} ? $q->div({-class => 'nav'}, $config->{nav}) : (),
 	       $q->start_form({-method => 'get'}),
@@ -181,9 +181,9 @@ sub format ( $$$ ) {
 		       $q->textfield(-name => 'title',
 				     -default => $expected_title,
 				     -override => 1), ' ',
-		       $is_smartphone ?
-		       $q->hidden(-name => 'type', -default => 'smartphone',
-				  override => 1) : (),
+		       $type eq 'auto' ? () :
+		       $q->hidden(-name => 'type', -default => $type,
+				  override => 1),
 		       $q->submit(-value => 'Refresh!'),
 		       $advanced ?
 		       ($q->a({-href => $basic_url }, 'Hide Options'),
@@ -215,7 +215,7 @@ sub format ( $$$ ) {
 	}
 
 	if ($i >= $page * $count) {
-	    __format_li $last_modified, $thread, $q, $fh;
+	    __format_li $last_modified, $thread, $q, $fh, $is_smartphone;
 	}
 
 	++$i;
