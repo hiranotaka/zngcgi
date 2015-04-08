@@ -39,7 +39,11 @@ sub link ( $ ) {
     my $server = $feed_data->{server};
     my $directory = $feed_data->{directory};
     my $created = $data->{created};
-    return "$server/test/read.cgi/$directory/$created/l20";
+    if ($feed_data->{force_mobile}) {
+	return "$server/test/cell.cgi?/$directory/$created/l20";
+    } else {
+	return "$server/test/read.cgi/$directory/$created/l20";
+    }
 }
 
 sub mobile_link ( $ ) {

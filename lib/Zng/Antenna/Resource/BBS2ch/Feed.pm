@@ -39,7 +39,11 @@ sub link ( $ ) {
     my $data = $self->{data};
     my $server = $data->{server};
     my $directory = $data->{directory};
-    return "$server/$directory/";
+    if ($data->{force_mobile}) {
+	return "$server/$directory/i";
+    } else {
+	return "$server/$directory/";
+    }
 }
 
 sub threads ( $ ) {
