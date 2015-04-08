@@ -3,15 +3,20 @@ package Zng::Antenna::Command::auto;
 use strict;
 use utf8;
 
+my $SMARTPHONE_USER_AGENT_RE =
+    '(?:^|\W)(?:iPhone|iPad|iPod|Android|BlackBerry|Windows Phone|Windows CE)' .
+    '(?:$|\W)';
+
 my $MOBILE_USER_AGENT_RE =
-    'DoCoMo|KDDI|J-PHONE|Vodafone|SoftBank|DDIPOCKET|WILLCOM';
+    '(?:^|\W)(?:DoCoMo|KDDI|J-PHONE|Vodafone|SoftBank|DDIPOCKET|WILLCOM)' .
+    '(?:$|\W)';
 
 sub format ( $$$ ) {
     my $config = shift;
     my $q = shift;
     my $fh = shift;
 
-    if ($q->user_agent('Mobile Safari')) {
+    if ($q->user_agent($SMARTPHONE_USER_AGENT_RE)) {
 	require Zng::Antenna::Command::smartphone;
 	Zng::Antenna::Command::smartphone::format($config, $q, $fh);
     } elsif ($q->user_agent($MOBILE_USER_AGENT_RE)) {
@@ -23,3 +28,4 @@ sub format ( $$$ ) {
     }
 }
 
+1;
