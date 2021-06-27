@@ -48,14 +48,6 @@ sub mobile_link ( $ ) {
     return "http://jbbs.shitaraba.net/bbs/i.cgi/$directory/$created/n";
 }
 
-sub smartphone_link ( $ ) {
-    my $self = shift;
-    my $data = $self->{data};
-    my $directory = $data->{feed}->{directory};
-    my $created = $data->{created};
-    return "http://jbbs.livedoor.jp/bbs/lite/read.cgi/$directory/$created/l20";
-}
-
 sub content ( $ ) {
     my $self = shift;
     my $data = $self->{data};

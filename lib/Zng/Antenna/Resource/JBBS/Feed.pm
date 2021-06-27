@@ -40,13 +40,6 @@ sub link ( $ ) {
     return "http://jbbs.shitaraba.net/$directory/";
 }
 
-sub smartphone_link ( $ ) {
-    my $self = shift;
-    my $data = $self->{data};
-    my $directory = $data->{directory};
-    return "http://jbbs.livedoor.jp/bbs/lite/subject.cgi/$directory/";
-}
-
 sub threads ( $ ) {
     my $self = shift;
     my $threads_data = $self->{data}->{threads};
