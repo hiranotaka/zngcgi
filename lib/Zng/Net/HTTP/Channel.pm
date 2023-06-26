@@ -312,7 +312,8 @@ sub handle_event ( $$ ) {
     if ($self->{ssl} && !$handle->isa('IO::Socket::SSL')) {
 	my $net = $self->{net};
 	if (!IO::Socket::SSL->start_SSL($handle,
-					SSL_ca_file => $net->ssl_ca_file)) {
+					SSL_ca_file => $net->ssl_ca_file,
+					SSL_verify_mode => SSL_VERIFY_NONE)) {
 	    if ($SSL_ERROR == SSL_WANT_READ) {
 		$self->{event} = POLLIN;
 		return;
